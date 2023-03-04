@@ -1,0 +1,6 @@
+4.3.2023 report 1:
+The basic structure of the program has been mostly defined, but will be slightly modified in the future for clarity.
+The most important functions for updating celestial body positions and velocities exist, as well as the celestialBody abstract class.
+No tests have been done yet, since a simple GUI hasn't been built yet. Methods will also be implemented using a vector class instead of X and Y values separately.
+I am about 1 week behind in schedule time, due to a heavy courseload this period. Will try to catch up ASAP.
+

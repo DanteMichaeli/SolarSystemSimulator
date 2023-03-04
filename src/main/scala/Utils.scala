@@ -1,5 +1,6 @@
 // THIS FILE CONTAINTS ALL METHODS IMPLEMENTING THE PHYSICS AND NUMERICAL METHODS OF THE CELESTIAL BODIES, AS WELL AS CONSTANTS
 import scala.math.*
+import scala.collection.mutable.Buffer
 
 //GUI CONSTANTS
 val width = 800
@@ -28,7 +29,7 @@ def gravitationalForces(body1: CelestialBody, body2: CelestialBody): (Double, Do
 
 
 //calculates total x- and y-forces on all bodies due to the rest of the bodies
-def totalForces(body: CelestialBody, bodies: Vector[CelestialBody]): (Double, Double) =
+def totalForces(body: CelestialBody, bodies: Buffer[CelestialBody]): (Double, Double) =
   var totalX = 0.0
   var totalY = 0.0
   for otherBody <- bodies do
@@ -39,11 +40,11 @@ def totalForces(body: CelestialBody, bodies: Vector[CelestialBody]): (Double, Do
 
 
 //updates and returns new acceleration values for a body based on forces and mass
-def updateAcceleration(body: CelestialBody, bodies: Vector[CelestialBody]): (Double, Double) =
+def updateAcceleration(body: CelestialBody, bodies: Buffer[CelestialBody]): (Double, Double) =
   val xAcceleration = totalForces(body, bodies)(0) / body.mass
   val yAcceleration = totalForces(body, bodies)(1) / body.mass
-  body.xAcceleration = xAcceleration
-  body.yAcceleration = yAcceleration
+  body.xAcc = xAcceleration
+  body.yAcc = yAcceleration
   (xAcceleration, yAcceleration)
 
 //calculates new velocity and position of body based on current position, velocity and acceleration and new acceleration.

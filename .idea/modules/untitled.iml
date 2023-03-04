@@ -12,7 +12,22 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-base:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-base:18.0.1:mac:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-controls:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-controls:18.0.1:mac:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-fxml:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-fxml:18.0.1:mac:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-graphics:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-graphics:18.0.1:mac:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-media:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-media:18.0.1:mac:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-swing:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-swing:18.0.1:mac:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-web:18.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.openjfx:javafx-web:18.0.1:mac:jar" level="project" />
     <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.13.10:jar" level="project" />
     <orderEntry type="library" name="sbt: org.scala-lang:scala3-library_3:3.2.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scalafx:scalafx_3:18.0.1-R28:jar" level="project" />
   </component>
 </module>
