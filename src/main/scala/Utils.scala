@@ -14,29 +14,23 @@ val AU = 149597871*1000 //m
 val dt = 3600 * 24 //1 day timestep
 
 
- //PHYSICS METHODS:
+//PHYSICS METHODS:
 
-//calculates forces acting upon a body due to gravitation from another body
-def gravitationalForces(body1: CelestialBody, body2: CelestialBody): (Double, Double) =
-  val xDistance = body2.xPos - body1.xPos
-  val yDistance = body2.yPos - body1.yPos
-  val r = sqrt(pow(xDistance,2) + pow(yDistance,2))
-  val angle = atan(yDistance / xDistance)
-  val force = G * (body1.mass * body2.mass)/ pow(r,2)
-  val xForce = force * cos(angle)
-  val yForce = force * sin(angle)
-  (xForce, yForce)
+//calculates force vector acting upon body 1 due to gravitation from body 2
+def gravitationalForce(body1: CelestialBody, body2: CelestialBody): Vector2D =
+  val distanceVector = Vector2D(body2.xPos - body1.xPos, body2.yPos-body1.yPos)
+  val forceVector: Vector2D = distanceVector.normalized * ( G * (body1.mass * body2.mass) / pow(distanceVector.magnitude,2) )
+  forceVector
 
 
-//calculates total x- and y-forces on all bodies due to the rest of the bodies
-def totalForces(body: CelestialBody, bodies: Buffer[CelestialBody]): (Double, Double) =
-  var totalX = 0.0
-  var totalY = 0.0
+
+//calculates total force vector acting upon a body due to all other bodies in the system
+def totalForce(body: CelestialBody, bodies: Buffer[CelestialBody]): Vector2D =
+  var forceGatherer = Vector2D(0,0)
   for otherBody <- bodies do
     if otherBody != body then
-      totalX += gravitationalForces(body, otherBody)(0)
-      totalY += gravitationalForces(body, otherBody)(1)
-  (totalX, totalY)
+      forceGatherer += gravitationalForce(body, otherBody)
+  forceGatherer
 
 
 //updates and returns new acceleration values for a body based on forces and mass
