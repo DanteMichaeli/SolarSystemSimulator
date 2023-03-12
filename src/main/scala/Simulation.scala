@@ -9,15 +9,12 @@ class Simulation:
   //reads in a text file and instantiates the celestial bodies
   def parseData(): Unit = ???
 
-  //updates all planets accelerations, positions and velocities
+  //updates all planets accelerations, positions and velocities using the velocityVerlet method defined in Utils
   def updatePositions(): Unit =
     for body <- celestialBodies do
-      val newX = velocityVerlet( body.xPos, body.xVel, body.xAcc, updateAcceleration(body,celestialBodies) )
-      val newY = velocityVerlet( body.yPos, body.yVel, body.yAcc, updateAcceleration(body,celestialBodies) )
-      body.xPos = newX(0)
-      body.yPos = newY(0)
-      body.xVel = newX(1)
-      body.yVel = newY(1)
+      val newValues = velocityVerlet( body.pos, body.vel, body.acc, body.updateAcceleration(celestialBodies) )
+      body.pos = newValues(0)
+      body.vel = newValues(1)
 
   // updates the state of the entire simulation
   def timePasses(): Unit =
