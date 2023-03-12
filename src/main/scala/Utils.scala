@@ -33,15 +33,12 @@ def totalForce(body: CelestialBody, bodies: Buffer[CelestialBody]): Vector2D =
   forceGatherer
 
 
-//updates and returns new acceleration values for a body based on forces and mass
-def updateAcceleration(body: CelestialBody, bodies: Buffer[CelestialBody]): (Double, Double) =
-  val xAcceleration = totalForce(body, bodies)(0) / body.mass
-  val yAcceleration = totalForce(body, bodies)(1) / body.mass
-  body.xAcc = xAcceleration
-  body.yAcc = yAcceleration
-  (xAcceleration, yAcceleration)
+//updates and returns new acceleration vector for a body based on forces and mass. NOTE: also returns the acceleration vector to be used in updatePositions
+def updateAcceleration(body: CelestialBody, bodies: Buffer[CelestialBody]) =
+  body.acc = totalForce(body, bodies) * (1 / body.mass) // a = F/m = F * 1/m
+  body.acc
 
-//calculates new velocity and position of body based on current position, velocity and acceleration and new acceleration.
+//calculates new position and velocity vector of body based on current position, velocity and acceleration and new acceleration.
 def velocityVerlet(currentPos: Double, currentVel: Double, currentAcc: Double, newAcc: Double): (Double, Double) =
   val newPos = currentPos + currentVel * dt + 0.5 * currentAcc * pow(dt,2)
   val newVel = currentVel + 0.5 * (currentAcc + newAcc) * dt
