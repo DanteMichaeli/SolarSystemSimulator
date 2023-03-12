@@ -18,7 +18,7 @@ val dt = 3600 * 24 //1 day timestep
 
 //calculates force vector acting upon body 1 due to gravitation from body 2
 def gravitationalForce(body1: CelestialBody, body2: CelestialBody): Vector2D =
-  val distanceVector = Vector2D(body2.xPos - body1.xPos, body2.yPos-body1.yPos)
+  val distanceVector = body2.pos - body1.pos //distansvektorn = differensen av kropparnas ortsvektorer från top left corner (0,0)
   val forceVector: Vector2D = distanceVector.normalized * ( G * (body1.mass * body2.mass) / pow(distanceVector.magnitude,2) )
   forceVector
 
@@ -38,8 +38,8 @@ def updateAcceleration(body: CelestialBody, bodies: Buffer[CelestialBody]) =
   body.acc = totalForce(body, bodies) * (1 / body.mass) // a = F/m = F * 1/m
   body.acc
 
-//calculates new position and velocity vector of body based on current position, velocity and acceleration and new acceleration.
-def velocityVerlet(currentPos: Double, currentVel: Double, currentAcc: Double, newAcc: Double): (Double, Double) =
-  val newPos = currentPos + currentVel * dt + 0.5 * currentAcc * pow(dt,2)
-  val newVel = currentVel + 0.5 * (currentAcc + newAcc) * dt
+//calculates new velocity and position vectors of body based on current position, velocity and acceleration and new acceleration.
+def velocityVerlet(currentPos: Vector2D, currentVel: Vector2D, currentAcc: Vector2D, newAcc: Vector2D): (Vector2D, Vector2D) =
+  val newPos = currentPos + currentVel * dt + currentAcc * pow(dt,2) * 0.5
+  val newVel = currentVel + (currentAcc + newAcc) * dt * 0.5
   (newPos, newVel)
