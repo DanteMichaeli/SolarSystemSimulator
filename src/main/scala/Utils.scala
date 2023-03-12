@@ -35,8 +35,8 @@ def totalForce(body: CelestialBody, bodies: Buffer[CelestialBody]): Vector2D =
 
 //updates and returns new acceleration values for a body based on forces and mass
 def updateAcceleration(body: CelestialBody, bodies: Buffer[CelestialBody]): (Double, Double) =
-  val xAcceleration = totalForces(body, bodies)(0) / body.mass
-  val yAcceleration = totalForces(body, bodies)(1) / body.mass
+  val xAcceleration = totalForce(body, bodies)(0) / body.mass
+  val yAcceleration = totalForce(body, bodies)(1) / body.mass
   body.xAcc = xAcceleration
   body.yAcc = yAcceleration
   (xAcceleration, yAcceleration)
