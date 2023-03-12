@@ -3,9 +3,9 @@ import scala.math.*
 import scala.collection.mutable.Buffer
 
 //GUI CONSTANTS
-val width = 800
-val height = 800
-val scale = 100/ AU   //scaling factor for the GUI: 100 pixels per AU
+val GUIwidth: Int = 800
+val GUIheight: Int = 800
+val scale: Double = 100/ AU   //scaling factor for the GUI: 100 pixels per AU
 
 
 //PHYSICS CONSTANTS:
