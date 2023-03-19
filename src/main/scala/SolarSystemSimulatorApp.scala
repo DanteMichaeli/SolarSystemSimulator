@@ -1,8 +1,14 @@
+import SolarSystemSimulatorApp.stage
 import javafx.scene.shape.Circle
 import scalafx.application.JFXApp3
 import scalafx.scene.{Group, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
+import scalafx.animation.Timeline
+import scalafx.animation.KeyFrame
+import scalafx.util.Duration
+import scala.language.postfixOps
+
 
 object SolarSystemSimulatorApp extends JFXApp3 :
 
@@ -28,5 +34,25 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   //create a new ScalaFX stage with all that is needed to display the celestial Bodies in their correct positions
     stage = new JFXApp3.PrimaryStage:
       title = "Solar System Simulator"
-      scene = new Scene(1000, 1000):
-        content = drawBodies()
+      width = GUIwidth
+      height = GUIheight
+      scene = new Scene:
+        fill = Color.Black
+
+    stage.scene().content = drawBodies()
+
+  stage.onShown = _ =>
+//create a ScalaFX timeline for updating the GUI on every tick
+    val timeline = new Timeline:
+      cycleCount = Timeline.Indefinite
+      keyFrames = Seq(KeyFrame(Duration(16), onFinished = _ =>
+        domain.timePasses()
+        stage.scene.value.content = drawBodies()
+      ))
+    timeline.play()
+
+  //start the simulation
+  stage.show()
+
+
+end SolarSystemSimulatorApp
