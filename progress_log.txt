@@ -4,3 +4,8 @@ The most important functions for updating celestial body positions and velocitie
 No tests have been done yet, since a simple GUI hasn't been built yet. Methods will also be implemented using a vector class instead of X and Y values separately.
 I am about 1 week behind in schedule time, due to a heavy courseload this period. Will try to catch up ASAP.
 
+19.3.2023 report 2:
+I have managed to ƒamiliarize myself a bit more with ScalaFX.
+I have managed to successfully create and display the first frame of a simulation, where the planets have been instantiated from a properly formatted text file.
+I am trying rn to create an update method that would progress the simulation forward, but to no avail...
+O2 has taken a lot of my time, so I am a bit behind schedule. I will try to catch up.
