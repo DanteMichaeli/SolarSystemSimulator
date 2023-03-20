@@ -4,13 +4,13 @@ import scala.collection.mutable.Buffer
 
 
 //PHYSICS CONSTANTS:
-val G = 6.6743 * pow(10,-11) //m^3 * kg^(-1) * s^(-2)
+val G = 2 //m^3 * kg^(-1) * s^(-2)
 val AU = 149597871*1000 //m
-val dt: Double = 2 //1 day timestep
+val dt: Double = 1 //1 day timestep
 
 
 //GUI CONSTANTS
-val GUIwidth: Int = 800
+val GUIwidth: Int = 1600
 val GUIheight: Int = 800
 val scale: Double = 100/ AU   //scaling factor for the GUI: 100 pixels per AU
 

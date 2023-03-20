@@ -12,7 +12,7 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
 
   //calculates force vector acting upon this body due to gravitation from another body
   def gravitationalForce(another: CelestialBody): Vector2D =
-    val distanceVector = this.pos - another.pos //distansvektorn = differensen av kropparnas ortsvektorer från top left corner (0,0)
+    val distanceVector = another.pos - this.pos //distansvektorn = differensen av kropparnas ortsvektorer från top left corner (0,0)
     val forceVector: Vector2D = distanceVector.normalized * ( G * (this.mass * another.mass) / pow(distanceVector.magnitude,2) )
     forceVector
 
