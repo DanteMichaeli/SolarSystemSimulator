@@ -22,7 +22,7 @@ class Simulation:
         celestialBodies += body
       else
         val body = new Planet( cols(0), cols(1).toDouble, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble), Vector2D(cols(5).toDouble, cols(6).toDouble), Color.web(cols(7)) )
-         celestialBodies += body
+        celestialBodies += body
 
       counter += 1
 

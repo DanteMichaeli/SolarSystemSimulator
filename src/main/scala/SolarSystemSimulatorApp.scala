@@ -4,10 +4,7 @@ import scalafx.application.JFXApp3
 import scalafx.scene.{Group, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
-import scalafx.animation.Timeline
-import scalafx.animation.KeyFrame
-import scalafx.util.Duration
-import scala.language.postfixOps
+import scalafx.animation.AnimationTimer
 
 
 object SolarSystemSimulatorApp extends JFXApp3 :
@@ -40,19 +37,14 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         fill = Color.Black
 
     stage.scene().content = drawBodies()
+    println(stage)
 
-  stage.onShown = _ =>
-//create a ScalaFX timeline for updating the GUI on every tick
-    val timeline = new Timeline:
-      cycleCount = Timeline.Indefinite
-      keyFrames = Seq(KeyFrame(Duration(16), onFinished = _ =>
-        domain.timePasses()
-        stage.scene.value.content = drawBodies()
-      ))
-    timeline.play()
-
-  //start the simulation
-  stage.show()
+ //create an animation using the AnimationTimer
+    val timer = AnimationTimer(t =>
+      domain.timePasses()
+      drawBodies()
+    )
+    timer.start()
 
 
 end SolarSystemSimulatorApp
