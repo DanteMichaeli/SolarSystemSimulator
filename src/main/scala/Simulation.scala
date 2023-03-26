@@ -8,20 +8,21 @@ class Simulation:
   val celestialBodies = Buffer[CelestialBody]()
 
   //reads in a (properly formatted) text file and instantiates the celestial bodies
+
   def parseData() =
     val source = scala.io.Source.fromFile("solarTest0.txt")
     val lines = source.getLines().toList
     source.close()
 
     var counter = 0
-
     for line <- lines do
+
       val cols = line.split(", ").map(_.trim)
       if counter == 0 then
-        val body = new Sun( cols(0), cols(1).toDouble, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble), Vector2D(0,0), Color.web(cols(5)) )
+        val body = new Sun( cols(0), cols(1).toDouble*scale, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble)*scale, Vector2D(0,0)*scale, Color.web(cols(5)) )
         celestialBodies += body
       else
-        val body = new Planet( cols(0), cols(1).toDouble, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble), Vector2D(cols(5).toDouble, cols(6).toDouble), Color.web(cols(7)) )
+        val body = new Planet( cols(0), cols(1).toDouble*scale, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble)*scale, Vector2D(cols(5).toDouble, cols(6).toDouble)*scale, Color.web(cols(7)) )
         celestialBodies += body
 
       counter += 1

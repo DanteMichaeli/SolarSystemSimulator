@@ -27,7 +27,7 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
   //updates and returns new acceleration vector for a body based on forces and mass. NOTE: also returns the acceleration vector to be used in updatePositions
   def updateAcceleration(bodies: Buffer[CelestialBody]) =
     this.acc = totalForce(bodies) * (1 / this.mass) // a = F/m = F * 1/m
-    this.acc
+    this.acc*scale
 
 
 
