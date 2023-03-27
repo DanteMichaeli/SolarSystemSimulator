@@ -8,14 +8,15 @@ class Simulation:
   val celestialBodies = Buffer[CelestialBody]()
 
   //reads in a (properly formatted) text file and instantiates the celestial bodies
+
   def parseData() =
     val source = scala.io.Source.fromFile("solarTest0.txt")
     val lines = source.getLines().toList
     source.close()
 
     var counter = 0
-
     for line <- lines do
+
       val cols = line.split(", ").map(_.trim)
       if counter == 0 then
         val body = new Sun( cols(0), cols(1).toDouble, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble), Vector2D(0,0), Color.web(cols(5)) )
