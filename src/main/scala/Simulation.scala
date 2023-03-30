@@ -10,7 +10,7 @@ class Simulation:
   //reads in a (properly formatted) text file and instantiates the celestial bodies
 
   def parseData() =
-    val source = scala.io.Source.fromFile("solarTest0.txt")
+    val source = scala.io.Source.fromFile("solarTest1.txt")
     val lines = source.getLines().toList
     source.close()
 
@@ -39,6 +39,10 @@ class Simulation:
   // updates the state of the entire simulation
   def timePasses(): Unit =
     updatePositions()
+    println(celestialBodies(1).pos.x)
+    println(celestialBodies(1).vel.x)
+    println(celestialBodies(1).acc.x)
+
     time += dt
 
 
