@@ -37,8 +37,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         fill = Color.Black
 
     stage.scene().content = drawBodies()
-    println(stage)
-    println(domain.celestialBodies)
 
  //animation using the AnimationTimer
     val timer = AnimationTimer(t =>
