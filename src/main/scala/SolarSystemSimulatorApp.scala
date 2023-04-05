@@ -1,11 +1,11 @@
 import SolarSystemSimulatorApp.stage
-import javafx.scene.shape.Circle
+import javafx.scene.shape.{Circle, Path, PathElement}
 import scalafx.application.JFXApp3
 import scalafx.scene.{Group, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
 import scalafx.animation.AnimationTimer
-import scalafx.scene.control.{Button, Slider}
+import scalafx.scene.control.{Button, Menu, MenuBar, MenuItem, SeparatorMenuItem, CheckMenuItem, RadioMenuItem, ToggleGroup, Slider}
 
 object SolarSystemSimulatorApp extends JFXApp3 :
 
@@ -30,6 +30,11 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     stage.scene.value.content = group
     group
 
+    //method for drawing the trajectories of the celestial bodies of Simulation into the GUI app. Should make use of path and path elements
+    //def drawTrajectories(): Group =
+
+
+
   override def start(): Unit =
   //ScalaFX stage with all that is needed to display the celestial Bodies in their correct positions
     stage = new JFXApp3.PrimaryStage:
@@ -40,9 +45,18 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         fill = Color.Black
 
   // play/pause button for the gui:
-    val playPause = new Button("Play")
-        playPause.setLayoutX(400)
+    val playPause = new Button("Pause")
+        playPause.setLayoutX(200)
         playPause.setLayoutY(700)
+  //when playPause is pressed, the animation is paused and the button text is changed to "Play"
+    playPause.onAction = _ =>
+      if isPaused then
+        isPaused = false
+        playPause.text = "Pause"
+      else
+        isPaused = true
+        playPause.text = "Play"
+
 
   // slider for adjusting dt, and therefore simulation speed (and accuracy):
     val slider = new Slider(0.1*dt, dt, 3*dt)
@@ -56,7 +70,26 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         slider.value.onChange((_, _, newValue) => dt = newValue.doubleValue())
         stage.scene().content = Group(playPause, slider, drawBodies())
 
-    stage.scene().content = Group(playPause, slider, drawBodies())
+    //menu bar with menus:
+    val menuBar = new MenuBar
+    val viewMenu = new Menu("View")
+    val directionVectors = new CheckMenuItem("Direction Vectors")
+    val accelerationVectors = new CheckMenuItem("Acceleration Vectors")
+    val trajectories = new CheckMenuItem("Trajectories")
+    viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories)
+
+
+
+    menuBar.menus = List(viewMenu)
+
+
+
+
+
+
+
+
+    stage.scene().content = Group(menuBar,playPause, slider, drawBodies())
 
   //animation timer for the gui, that pauses if variable isPaused is true
     val timer = AnimationTimer(t =>
@@ -66,14 +99,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     )
     timer.start()
 
-  //when playPause is pressed, the animation is paused and the button text is changed to "Play"
-    playPause.onAction = _ =>
-      if isPaused then
-        isPaused = false
-        playPause.text = "Pause"
-      else
-        isPaused = true
-        playPause.text = "Play"
 
 
 end SolarSystemSimulatorApp

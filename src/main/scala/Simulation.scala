@@ -38,6 +38,7 @@ class Simulation:
 
   // updates the state of the entire simulation
   def timePasses(): Unit =
+    celestialBodies.foreach( (body: CelestialBody) => body.trajectory += body.pos )
     updatePositions()
     time += dt
 

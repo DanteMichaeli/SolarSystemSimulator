@@ -7,7 +7,7 @@ import scala.math.pow
 abstract class CelestialBody(val name: String, val radius: Double, val mass: Double, var pos: Vector2D, var vel: Vector2D, val color: scalafx.scene.paint.Color):
 
   //var distanceToSun = ??? //distance between the planet's center of mass and the sun's
-  var orbit = Buffer[Vector2D]() //stores pos vectors through time for drawing trajectories
+  var trajectory = Buffer[Vector2D](this.pos) //stores pos vectors through time for drawing trajectories. Starts with the initial position of the body
   var acc: Vector2D = Vector2D(0,0) //will be immediately recalculated with total force acting on the body
 
   //calculates force vector acting upon this body due to gravitation from another body
