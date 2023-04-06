@@ -6,14 +6,14 @@ import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
 import scalafx.animation.AnimationTimer
 import scalafx.scene.control.{Button, CheckMenuItem, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
-import scalafx.scene.shape.Polyline
+import scalafx.scene.paint.Color.{Pink, Purple, White}
+import scalafx.scene.shape.{Line, Polygon, Polyline}
 
+import scala.collection.mutable
 import scala.language.postfixOps
 
 object SolarSystemSimulatorApp extends JFXApp3 :
 
-  // toggled by playPause, stops the animation when true
-  var isPaused = false
 
   //domain of the simulation
   val domain = new Simulation
@@ -33,27 +33,121 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     group
 
 
-  // method for tracing the trajectory of all bodie using the bodies' trajectory buffer, and drawing it into the GUI app:
+  //method for tracing the trajectory of all bodie using the bodies' trajectory buffer:
+  var trajectoriesOn = false
   def drawTrajectories(): Group =
+    if trajectoriesOn then
+      val bodies = domain.celestialBodies
+      val group = new Group
+      for body <- bodies do
+        val polyline = new Polyline()
+        polyline.setStroke(body.color)
+        polyline.setStrokeWidth(1)
+        group.getChildren.add(polyline)
+        for (pos, i) <- body.trajectory.zipWithIndex do
+    //only trace every ith point to improve efficiency
+          if i % 15 == 0 then
+            polyline.getPoints.addAll(pos.x, pos.y)
+      group
+    else
+      val group = new Group
+      group
+
+
+  //method for drawing the direction vectors of all bodies:
+  var directionVectorsOn = false
+  def drawDirVectors(): Group =
     val bodies = domain.celestialBodies
     val group = new Group
-    for body <- bodies do
-      val polyline = new Polyline()
-      polyline.setStroke(body.color)
-      polyline.setStrokeWidth(1)
-      group.getChildren.add(polyline)
-      for (pos, i) <- body.trajectory.zipWithIndex do
-  //only trace every ith point to improve efficiency
-        if i % 15 == 0 then
-          polyline.getPoints.addAll(pos.x, pos.y)
+    if directionVectorsOn then
+      for n <- bodies.indices do
+        if n > 0 then
+          val direction = bodies(n).vel.normalized
+          val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
+          val arrowLength = bodies(n).radius + 10
+
+          // endpoint of arrow segment
+          val endX = bodies(n).pos.x + direction.x * arrowLength
+          val endY = bodies(n).pos.y + direction.y * arrowLength
+
+          // line segment
+          val segment = new Line()
+          segment.setStartX(bodies(n).pos.x)
+          segment.setStartY(bodies(n).pos.y)
+          segment.setEndX(endX)
+          segment.setEndY(endY)
+          segment.setStroke(White)
+
+          // arrowhead, a triangle pointing in the direction of the velocity vector
+          val arrowheadSize = 5
+          val arrowhead = new Polygon()
+          arrowhead.getPoints.addAll(endX, endY,
+                                     endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+                                     endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+                                     endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+                                     endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+          )
+          arrowhead.setFill(White)
+
+          // add segment and arrowhead to group
+          group.getChildren.addAll(segment, arrowhead)
     group
+
+
+
+  //method for drawing the acceleration vectors of all bodies, just like the direction vectors
+  var accelerationVectorsOn = false
+  def drawAccVectors(): Group =
+    val bodies = domain.celestialBodies
+    val group = new Group
+    if accelerationVectorsOn then
+      for n <- bodies.indices do
+        if n > 0 then
+          val acceleration = bodies(n).acc.normalized
+          val angle = math.atan2(acceleration.y, acceleration.x) * 180 / math.Pi
+          val arrowLength = bodies(n).radius + 10
+
+          // endpoint of arrow segment
+          val endX = bodies(n).pos.x + acceleration.x * arrowLength
+          val endY = bodies(n).pos.y + acceleration.y * arrowLength
+
+          // line segment
+          val segment = new Line()
+          segment.setStartX(bodies(n).pos.x)
+          segment.setStartY(bodies(n).pos.y)
+          segment.setEndX(endX)
+          segment.setEndY(endY)
+          segment.setStroke(Purple)
+
+          // arrowhead, a triangle pointing in the direction of the velocity vector
+          val arrowheadSize = 5
+          val arrowhead = new Polygon()
+          arrowhead.getPoints.addAll(endX, endY,
+                                     endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+                                     endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+                                     endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+                                     endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+          )
+          arrowhead.setFill(Purple)
+
+          // add segment and arrowhead to group
+          group.getChildren.addAll(segment, arrowhead)
+    group
+
+
+
+
+
+
 
 
   //super group that combines all drawings of bodies, trajectories, vectors et.c.
   def drawSimulation(): Group =
     val bodiesGroup = drawBodies()
     val trajectoriesGroup = drawTrajectories()
-    val simulationGroup = new Group(bodiesGroup, trajectoriesGroup)
+    val dirVectorsGroup = drawDirVectors()
+    val accVectorsGroup = drawAccVectors()
+    val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup)
     simulationGroup
 
 
@@ -73,6 +167,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         playPause.setLayoutX(200)
         playPause.setLayoutY(700)
   //when playPause is pressed, the animation is paused and the button text is changed to "Play"
+    var isPaused = false
     playPause.onAction = _ =>
       if isPaused then
         isPaused = false
@@ -96,24 +191,42 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     //menu bar with menus:
     val menuBar = new MenuBar
     val viewMenu = new Menu("View")
+
+    //when directionVectors is checked, the directionVectorsOn variable is set to true, and the direction vectors are drawn
     val directionVectors = new CheckMenuItem("Direction Vectors")
+    directionVectors.onAction = _ =>
+      if directionVectors.selected.value then
+        domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
+        directionVectorsOn = true
+      else
+        directionVectorsOn = false
+
+    //when accelerationVectors is checked, the accelerationVectorsOn variable is set to true, and the acceleration vectors are drawn
     val accelerationVectors = new CheckMenuItem("Acceleration Vectors")
+    accelerationVectors.onAction = _ =>
+      if accelerationVectors.selected.value then
+        accelerationVectorsOn = true
+      else
+        accelerationVectorsOn = false
+
+    //when trajectories is checked, the trajectoriesOn variable is set to true, and the trajectories are drawn, and trajectory buffers are cleared
     val trajectories = new CheckMenuItem("Trajectories")
+    trajectories.onAction = _ =>
+      if trajectories.selected.value then
+        domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
+        trajectoriesOn = true
+      else
+        trajectoriesOn = false
+
     viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories)
 
     menuBar.menus = List(viewMenu)
-
-
-
-
-    stage.scene().content = Group(menuBar,playPause, slider, drawSimulation())
-
 
   //animation timer for the gui, that pauses if variable isPaused is true
     val timer = AnimationTimer(t =>
       if !isPaused then
         domain.timePasses()
-        stage.scene().content = Group(menuBar,playPause, slider, drawSimulation())
+        stage.scene().content = Group(menuBar, playPause, slider, drawSimulation())
     )
     timer.start()
 
