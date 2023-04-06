@@ -33,7 +33,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     group
 
 
-  //method for tracing the trajectory of all bodie using the bodies' trajectory buffer:
+  //method for tracing the trajectory of all bodies using the bodies' trajectory buffer:
   var trajectoriesOn = false
   def drawTrajectories(): Group =
     if trajectoriesOn then
@@ -178,7 +178,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
   // slider for adjusting dt, and therefore simulation speed (and accuracy):
-    val slider = new Slider(0.1*dt, dt, 3*dt)
+    val slider = new Slider(0.1*dt, dt, 10*dt)
         slider.setLayoutX(400)
         slider.setLayoutY(750)
         slider.setShowTickLabels(true)
