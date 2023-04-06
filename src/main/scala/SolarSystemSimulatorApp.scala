@@ -1,11 +1,14 @@
 import SolarSystemSimulatorApp.stage
-import javafx.scene.shape.{Circle, Path, PathElement}
+import javafx.scene.shape.{Circle, LineTo, MoveTo, Path, PathElement}
 import scalafx.application.JFXApp3
 import scalafx.scene.{Group, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
 import scalafx.animation.AnimationTimer
-import scalafx.scene.control.{Button, Menu, MenuBar, MenuItem, SeparatorMenuItem, CheckMenuItem, RadioMenuItem, ToggleGroup, Slider}
+import scalafx.scene.control.{Button, CheckMenuItem, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
+import scalafx.scene.shape.Polyline
+
+import scala.language.postfixOps
 
 object SolarSystemSimulatorApp extends JFXApp3 :
 
@@ -27,11 +30,32 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       circle.setRadius(body.radius)
       circle.setFill(body.color)
       group.getChildren.add(circle)
-    stage.scene.value.content = group
     group
 
-    //method for drawing the trajectories of the celestial bodies of Simulation into the GUI app. Should make use of path and path elements
-    //def drawTrajectories(): Group =
+
+  // method for tracing the trajectory of all bodie using the bodies' trajectory buffer, and drawing it into the GUI app:
+  def drawTrajectories(): Group =
+    val bodies = domain.celestialBodies
+    val group = new Group
+    for body <- bodies do
+      val polyline = new Polyline()
+      polyline.setStroke(body.color)
+      polyline.setStrokeWidth(1)
+      group.getChildren.add(polyline)
+      for (pos, i) <- body.trajectory.zipWithIndex do
+  //only trace every ith point to improve efficiency
+        if i % 15 == 0 then
+          polyline.getPoints.addAll(pos.x, pos.y)
+    group
+
+
+  //super group that combines all drawings of bodies, trajectories, vectors et.c.
+  def drawSimulation(): Group =
+    val bodiesGroup = drawBodies()
+    val trajectoriesGroup = drawTrajectories()
+    val simulationGroup = new Group(bodiesGroup, trajectoriesGroup)
+    simulationGroup
+
 
 
 
@@ -68,7 +92,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         slider.setMinorTickCount(5)
         slider.setBlockIncrement(10)
         slider.value.onChange((_, _, newValue) => dt = newValue.doubleValue())
-        stage.scene().content = Group(playPause, slider, drawBodies())
 
     //menu bar with menus:
     val menuBar = new MenuBar
@@ -78,24 +101,19 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val trajectories = new CheckMenuItem("Trajectories")
     viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories)
 
-
-
     menuBar.menus = List(viewMenu)
 
 
 
 
+    stage.scene().content = Group(menuBar,playPause, slider, drawSimulation())
 
-
-
-
-    stage.scene().content = Group(menuBar,playPause, slider, drawBodies())
 
   //animation timer for the gui, that pauses if variable isPaused is true
     val timer = AnimationTimer(t =>
       if !isPaused then
         domain.timePasses()
-        drawBodies()
+        stage.scene().content = Group(menuBar,playPause, slider, drawSimulation())
     )
     timer.start()
 
