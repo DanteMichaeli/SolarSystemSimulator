@@ -201,7 +201,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         slider.setBlockIncrement(10)
         slider.setSnapToTicks(true)
         slider.setPrefWidth(200)
-    slider.valueProperty().addListener((_, oldValue, newValue) => 
+    slider.valueProperty().addListener((_, oldValue, newValue) =>
       dayAdjuster = newValue.intValue()
       dt = (60*60*24*dayAdjuster) / 60
     )
