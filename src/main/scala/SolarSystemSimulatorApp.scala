@@ -190,13 +190,13 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
-  // slider for adjusting dt, and therefore simulation speed. Should start in the middle of it
-    val slider = new Slider(1, 20, 10)
+  // slider for adjusting dayAdjuster (dt), and therefore simulation speed. from 1/10 of dayAdjuster days to 2*dayAdjuster days
+    val slider = new Slider(1/10*dayAdjuster, 2*dayAdjuster, dayAdjuster)
         slider.setLayoutX(200)
         slider.setLayoutY(735)
         slider.setShowTickLabels(true)
         slider.setShowTickMarks(true)
-        slider.setMajorTickUnit(9)
+        slider.setMajorTickUnit(10)
         slider.setMinorTickCount(1)
         slider.setBlockIncrement(10)
         slider.setSnapToTicks(true)

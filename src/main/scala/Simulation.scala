@@ -13,12 +13,15 @@ class Simulation:
     val lines = source.getLines().toList
     source.close()
 
-    var firstLine = true
+    var counter = 0
 
     for line <- lines do
-        if firstLine then
+        if counter == 0 then
           time = line.toDouble //time (in seconds) for how long to run the simulation.
-          firstLine = false
+          counter += 1
+        else if counter == 1 then
+          dayAdjuster = line.toDouble //user-input on dt (in days) for the timestep
+          counter += 1
         else
           val cols = line.split(", ").map(_.trim)
           try
@@ -38,7 +41,7 @@ class Simulation:
 
           catch
             case e: IllegalArgumentException => throw e
-            case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n.\n.\n.")
+            case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n.\n.\n.")
 
 
 
