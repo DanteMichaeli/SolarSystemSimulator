@@ -166,7 +166,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   // play/pause button for the gui:
     val playPause = new Button("Pause")
         playPause.setLayoutX(1)
-        playPause.setLayoutY(745)
+        playPause.setLayoutY(740)
   //when playPause is pressed, the animation is paused and the button text is changed to "Play"
     var isPaused = false
     playPause.onAction = _ =>
@@ -181,7 +181,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   // button for resetting the simulation:
     val reset = new Button("Reset")
         reset.setLayoutX(55)
-        reset.setLayoutY(745)
+        reset.setLayoutY(740)
     reset.onAction = _ =>
       domain = new Simulation
       domain.parseData()
@@ -190,16 +190,22 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
-  // slider for adjusting dt, and therefore simulation speed (and accuracy):
-    val slider = new Slider(0.1*dt, dt, 10*dt)
-        slider.setLayoutX(400)
-        slider.setLayoutY(750)
+  // slider for adjusting dt, and therefore simulation speed. Should start in the middle of it
+    val slider = new Slider(1, 20, 10)
+        slider.setLayoutX(200)
+        slider.setLayoutY(735)
         slider.setShowTickLabels(true)
         slider.setShowTickMarks(true)
-        slider.setMajorTickUnit(10)
-        slider.setMinorTickCount(5)
+        slider.setMajorTickUnit(9)
+        slider.setMinorTickCount(1)
         slider.setBlockIncrement(10)
-        slider.value.onChange((_, _, newValue) => dt = newValue.doubleValue())
+        slider.setSnapToTicks(true)
+        slider.setPrefWidth(200)
+    slider.valueProperty().addListener((_, oldValue, newValue) => 
+      dayAdjuster = newValue.intValue()
+      dt = (60*60*24*dayAdjuster) / 60
+    )
+
 
     //menu bar with menus:
     val menuBar = new MenuBar
@@ -238,8 +244,8 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     //create a time label that displays domain.time. Should also update when domain.time updates:
     val timeProperty = new SimpleDoubleProperty(domain.time)
     val timeLabel = new Label(s"Time: ${domain.time}")
-        timeLabel.setLayoutX(170)
-        timeLabel.setLayoutY(747.5)
+        timeLabel.setLayoutX(110)
+        timeLabel.setLayoutY(742.5)
         timeLabel.setTextFill(White)
     timeLabel.textProperty().bind(timeProperty.asString("Time: %.1f"))
     timeProperty.addListener((observable, oldValue, newValue) => timeLabel.setText(s"Time: ${newValue.intValue}"))
