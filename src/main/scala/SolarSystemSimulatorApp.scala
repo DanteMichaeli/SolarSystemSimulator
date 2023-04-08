@@ -5,18 +5,19 @@ import scalafx.scene.{Group, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
 import scalafx.animation.AnimationTimer
-import scalafx.scene.control.{Button, CheckMenuItem, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
+import scalafx.scene.control.{Button, CheckMenuItem, Label, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
 import scalafx.scene.paint.Color.{Pink, Purple, White}
 import scalafx.scene.shape.{Line, Polygon, Polyline}
-
 import scala.collection.mutable
 import scala.language.postfixOps
+import javafx.beans.property.SimpleDoubleProperty
+
 
 object SolarSystemSimulatorApp extends JFXApp3 :
 
 
   //domain of the simulation
-  val domain = new Simulation
+  var domain = new Simulation
   domain.parseData()
 
   //method for drawing the celestial bodies of Simulation into the GUI app:
@@ -164,8 +165,8 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   // play/pause button for the gui:
     val playPause = new Button("Pause")
-        playPause.setLayoutX(200)
-        playPause.setLayoutY(700)
+        playPause.setLayoutX(1)
+        playPause.setLayoutY(745)
   //when playPause is pressed, the animation is paused and the button text is changed to "Play"
     var isPaused = false
     playPause.onAction = _ =>
@@ -175,6 +176,18 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       else
         isPaused = true
         playPause.text = "Play"
+
+
+  // button for resetting the simulation:
+    val reset = new Button("Reset")
+        reset.setLayoutX(55)
+        reset.setLayoutY(745)
+    reset.onAction = _ =>
+      domain = new Simulation
+      domain.parseData()
+
+
+
 
 
   // slider for adjusting dt, and therefore simulation speed (and accuracy):
@@ -222,14 +235,27 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
     menuBar.menus = List(viewMenu)
 
-  //animation timer for the gui, that pauses if variable isPaused is true
+    //create a time label that displays domain.time. Should also update when domain.time updates:
+    val timeProperty = new SimpleDoubleProperty(domain.time)
+    val timeLabel = new Label(s"Time: ${domain.time}")
+        timeLabel.setLayoutX(170)
+        timeLabel.setLayoutY(747.5)
+        timeLabel.setTextFill(White)
+    timeLabel.textProperty().bind(timeProperty.asString("Time: %.1f"))
+    timeProperty.addListener((observable, oldValue, newValue) => timeLabel.setText(s"Time: ${newValue.intValue}"))
+
+
+
+
+  //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps
     val timer = AnimationTimer(t =>
-      if !isPaused then
+      if !isPaused && domain.time > 0 then
         domain.timePasses()
-        stage.scene().content = Group(menuBar, playPause, slider, drawSimulation())
+        stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, drawSimulation())
+        domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
+        timeProperty.set(domain.time)
     )
     timer.start()
-
 
 
 end SolarSystemSimulatorApp

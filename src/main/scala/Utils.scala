@@ -5,7 +5,7 @@ import scala.collection.mutable.Buffer
 
 //PHYSICS CONSTANTS:
 val G = 6.6743*pow(10,-11) //m^3 * kg^(-1) * s^(-2)
-var dt: Double = 0.5*30*60*24 //larger time-step means faster simulation, but less accurate
+var dt: Double = (60*60*24*10) / 60 //larger time-step means faster simulation, but less accurate. In seconds (SI-units). Divide by 60 since the gui updates 60 fps
 
 
 //GUI CONSTANTS

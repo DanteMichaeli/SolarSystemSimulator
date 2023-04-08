@@ -14,18 +14,23 @@ class Simulation:
     val lines = source.getLines().toList
     source.close()
 
-    var counter = 0
+    var firstLine = true
+
     for line <- lines do
-
-      val cols = line.split(", ").map(_.trim)
-      if counter == 0 then
-        val body = new Sun( cols(0), cols(1).toDouble, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble), Vector2D(0,0), Color.web(cols(5)) )
-        celestialBodies += body
+      if firstLine then
+        time = line.toDouble //time (in seconds) for how long to run the simulation.
+        firstLine = false
       else
-        val body = new Planet( cols(0), cols(1).toDouble, cols(2).toDouble, Vector2D(cols(3).toDouble, cols(4).toDouble), Vector2D(cols(5).toDouble, cols(6).toDouble), Color.web(cols(7)) )
-        celestialBodies += body
-
-      counter += 1
+        val cols = line.split(", ").map(_.trim)
+        if cols(0) == "sun" then
+          val body = new Sun( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(0,0), Color.web(cols(6)) )
+          celestialBodies += body
+        else if cols(0) == "pla" then
+          val body = new Planet( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+          celestialBodies += body
+        else
+          val body = new Satellite( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+          celestialBodies += body
 
 
 
@@ -40,7 +45,6 @@ class Simulation:
   def timePasses(): Unit =
     celestialBodies.foreach( (body: CelestialBody) => body.trajectory += body.pos )
     updatePositions()
-    time += dt
 
 
 
