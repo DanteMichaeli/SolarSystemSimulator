@@ -8,9 +8,11 @@ import scalafx.animation.AnimationTimer
 import scalafx.scene.control.{Button, CheckMenuItem, Label, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
 import scalafx.scene.paint.Color.{Pink, Purple, White}
 import scalafx.scene.shape.{Line, Polygon, Polyline}
+
 import scala.collection.mutable
 import scala.language.postfixOps
 import javafx.beans.property.SimpleDoubleProperty
+import scalafx.stage.FileChooser
 
 
 object SolarSystemSimulatorApp extends JFXApp3 :
@@ -18,7 +20,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData()
+  domain.parseData("theSolarSystem.txt")
 
   //method for drawing the celestial bodies of Simulation into the GUI app:
   def drawBodies(): Group =
@@ -184,9 +186,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         reset.setLayoutY(740)
     reset.onAction = _ =>
       domain = new Simulation
-      domain.parseData()
-
-
+      domain.parseData(domain.name)
 
 
 
@@ -209,7 +209,21 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
     //menu bar with menus:
     val menuBar = new MenuBar
+    val fileMenu = new Menu("File")
     val viewMenu = new Menu("View")
+
+    //open menu item for opening a new simulation file
+    val open = new MenuItem("Open")
+    //when open is pressed, a file chooser is opened, and the simulation is reset and the new file is parsed
+    open.onAction = _ =>
+      val fileChooser = new FileChooser()
+      fileChooser.setTitle("Open Simulation File")
+      val file = fileChooser.showOpenDialog(stage)
+      if file != null then
+        domain = new Simulation
+        domain.parseData(file.getAbsolutePath())
+
+    val saveAs = new MenuItem("Save As")
 
     //when directionVectors is checked, the directionVectorsOn variable is set to true, and the direction vectors are drawn
     val directionVectors = new CheckMenuItem("Direction Vectors")
@@ -237,9 +251,10 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       else
         trajectoriesOn = false
 
+    fileMenu.items = List(open, new SeparatorMenuItem, saveAs)
     viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories)
 
-    menuBar.menus = List(viewMenu)
+    menuBar.menus = List(fileMenu, viewMenu)
 
     //create a time label that displays domain.time. Should also update when domain.time updates:
     val timeProperty = new SimpleDoubleProperty(domain.time)
