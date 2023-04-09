@@ -28,6 +28,12 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
   def updateAcceleration(bodies: Buffer[CelestialBody]) =
     this.acc = totalForce(bodies) * (1 / this.mass) // a = F/m = F * 1/m
     this.acc
+    
+  //compares distance between two bodies to their sum of radii to check for collision
+  def isColliding(another: CelestialBody): Boolean =
+    val distance = (this.pos - another.pos).magnitude
+    val sumOfRadii = this.radius + another.radius
+    if distance <= sumOfRadii then true else false
 
 
 

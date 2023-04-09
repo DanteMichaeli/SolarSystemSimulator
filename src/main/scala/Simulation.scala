@@ -6,6 +6,7 @@ import scala.math.{atan, cos, pow, sin, sqrt}
 class Simulation:
   var time = 0.00
   val celestialBodies = Buffer[CelestialBody]()
+  var collision = false
 
   //reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception
   def parseData() =
@@ -44,6 +45,15 @@ class Simulation:
             case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n.\n.\n.")
 
 
+  //checks if any two celestial bodies have collided (also checks with itself, but makes code easier)
+  def detectCollisions(): Unit =
+    for i <- celestialBodies.indices do
+      for j <- i+1 until celestialBodies.length do
+        if celestialBodies(i).isColliding(celestialBodies(j)) then
+          collision = true
+          println("collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name)
+          return
+
 
   //updates all planets accelerations, positions and velocities using the velocityVerlet method defined in Utils
   def updatePositions(): Unit =
@@ -56,6 +66,7 @@ class Simulation:
   def timePasses(): Unit =
     celestialBodies.foreach( (body: CelestialBody) => body.trajectory += body.pos )
     updatePositions()
+    detectCollisions()
 
 
 

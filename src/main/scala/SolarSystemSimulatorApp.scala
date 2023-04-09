@@ -255,9 +255,10 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps
     val timer = AnimationTimer(t =>
-      if !isPaused && domain.time > 0 then
+      if !isPaused && domain.time > 0 && !domain.collision then
         domain.timePasses()
         stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, drawSimulation())
+        println(domain.collision)
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
         timeProperty.set(domain.time)
     )
