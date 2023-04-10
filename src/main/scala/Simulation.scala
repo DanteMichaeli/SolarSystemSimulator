@@ -8,6 +8,7 @@ class Simulation:
   var time = 0.00
   val celestialBodies = Buffer[CelestialBody]()
   var collision = false
+  var collisionData = ""
 
 
   //reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception
@@ -73,8 +74,8 @@ class Simulation:
       for j <- i+1 until celestialBodies.length do
         if celestialBodies(i).isColliding(celestialBodies(j)) then
           collision = true
-          println("Collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name + " at time " + time + ".")
-          return
+          collisionData = "Collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name + " at time " + time + "."
+    
 
 
   //updates all planets accelerations, positions and velocities using the velocityVerlet method defined in Utils

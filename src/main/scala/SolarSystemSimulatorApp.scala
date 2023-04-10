@@ -181,6 +181,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       fadeTransition.setOnFinished( _ => messageDisplayer.setText("") )
 
 
+
   // play/pause button for the gui:
     val playPause = new Button("Pause")
         playPause.setLayoutX(1)
@@ -335,6 +336,9 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, drawSimulation())
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
         timeProperty.set(domain.time)
+
+      else if domain.collision then
+        displayMessage(domain.collisionData)
 
       else if domain.time <= 0 && !isComplete then
         displayMessage("Simulation complete.")
