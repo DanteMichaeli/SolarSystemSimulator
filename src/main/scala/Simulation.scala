@@ -9,6 +9,7 @@ class Simulation:
   val celestialBodies = Buffer[CelestialBody]()
   var collision = false
 
+
   //reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception
   def parseData(fileName: String) =
     name = fileName
@@ -47,8 +48,23 @@ class Simulation:
               case e: IllegalArgumentException => throw e
               case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n.\n.\n.")
     catch
-      case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n.\n.\n.")
+      case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n\nConsider exampleFile.txt for more guidance")
 
+
+  //method for writing and saving the simulation data to a .txt file, to be saved on the user's computer. In a format that can be read by the parseData method
+  def saveData(fileName: String): Unit =
+    val file = new java.io.File(fileName)
+    val bw = new java.io.BufferedWriter(new java.io.FileWriter(file))
+    bw.write(time.toString + "\n")
+    bw.write(dayAdjuster.toString + "\n")
+    for n <- celestialBodies.indices do
+      if n == 0 then
+        bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).colorCode}\n")
+      else if n == celestialBodies.length-1 then
+        bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).vel.x}, ${celestialBodies(n).vel.y}, ${celestialBodies(n).colorCode}")
+      else
+        bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).vel.x}, ${celestialBodies(n).vel.y}, ${celestialBodies(n).colorCode}\n")
+    bw.close()
 
 
   //checks if any two celestial bodies have collided (also checks with itself, but makes code easier)
@@ -57,7 +73,7 @@ class Simulation:
       for j <- i+1 until celestialBodies.length do
         if celestialBodies(i).isColliding(celestialBodies(j)) then
           collision = true
-          println("collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name)
+          println("Collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name + " at time " + time + ".")
           return
 
 
@@ -73,6 +89,8 @@ class Simulation:
     celestialBodies.foreach( (body: CelestialBody) => body.trajectory += body.pos )
     updatePositions()
     detectCollisions()
+
+
 
 
 

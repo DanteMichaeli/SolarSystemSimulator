@@ -19,3 +19,9 @@ def velocityVerlet(currentPos: Vector2D, currentVel: Vector2D, currentAcc: Vecto
   val newPos = currentPos + (currentVel * dt + currentAcc * pow(dt,2) * 0.5) * (1 / scalingFactor)
   val newVel = currentVel + (currentAcc + newAcc) * dt * 0.5
   (newPos, newVel)
+  
+
+//CUSTOM EXCEPTIONS
+class NonPositiveMassException extends IllegalArgumentException("Non-positive mass error - Make sure none of your masses are negative or zero.")
+class NonPositiveRadiusException extends IllegalArgumentException("Non-positive radius error - Make sure none of your radii are negative or zero.")
+class NegativeCoordinatesException extends IllegalArgumentException("Negative coordinates error - Make sure none of your initializing coordinates are negative.")

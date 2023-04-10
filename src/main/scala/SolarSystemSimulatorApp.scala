@@ -4,15 +4,18 @@ import scalafx.application.JFXApp3
 import scalafx.scene.{Group, Scene}
 import scalafx.scene.paint.Color
 import scalafx.scene.SceneIncludes.jfxScene2sfx
-import scalafx.animation.AnimationTimer
-import scalafx.scene.control.{Button, CheckMenuItem, Label, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
+import scalafx.animation.{AnimationTimer, FadeTransition}
+import scalafx.scene.control.{Alert, Button, CheckMenuItem, Label, Menu, MenuBar, MenuItem, RadioMenuItem, SeparatorMenuItem, Slider, ToggleGroup}
 import scalafx.scene.paint.Color.{Pink, Purple, White}
 import scalafx.scene.shape.{Line, Polygon, Polyline}
-
 import scala.collection.mutable
 import scala.language.postfixOps
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.util.Duration
+import scalafx.scene.control.Alert.AlertType
 import scalafx.stage.FileChooser
+import java.io.IOException
+import scalafx.Includes._
 
 
 object SolarSystemSimulatorApp extends JFXApp3 :
@@ -21,6 +24,8 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   //domain of the simulation
   var domain = new Simulation
   domain.parseData("theSolarSystem.txt")
+  var isComplete = false
+
 
   //method for drawing the celestial bodies of Simulation into the GUI app:
   def drawBodies(): Group =
@@ -139,11 +144,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
-
-
-
-
-
   //super group that combines all drawings of bodies, trajectories, vectors et.c.
   def drawSimulation(): Group =
     val bodiesGroup = drawBodies()
@@ -152,7 +152,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val accVectorsGroup = drawAccVectors()
     val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup)
     simulationGroup
-
 
 
 
@@ -165,6 +164,23 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       scene = new Scene:
         fill = Color.Black
 
+   //message displayer that displays messages of failed / successful operations. The text should fade away after a few seconds
+    val messageDisplayer = new Label("Launched simulator.")
+        messageDisplayer.setLayoutX(420)
+        messageDisplayer.setLayoutY(740)
+        messageDisplayer.setTextFill(White)
+
+    val fadeTransition = new FadeTransition(jfxDuration2sfx(Duration.seconds(5)), messageDisplayer)
+    fadeTransition.setToValue(0.0)
+    fadeTransition.play()
+
+    def displayMessage(message: String): Unit =
+      messageDisplayer.setOpacity(100)
+      messageDisplayer.setText(message)
+      fadeTransition.play()
+      fadeTransition.setOnFinished( _ => messageDisplayer.setText("") )
+
+
   // play/pause button for the gui:
     val playPause = new Button("Pause")
         playPause.setLayoutX(1)
@@ -175,9 +191,11 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       if isPaused then
         isPaused = false
         playPause.text = "Pause"
+        displayMessage("Simulation resumed.")
       else
         isPaused = true
         playPause.text = "Play"
+        displayMessage("Simulation paused.")
 
 
   // button for resetting the simulation:
@@ -185,8 +203,10 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         reset.setLayoutX(55)
         reset.setLayoutY(740)
     reset.onAction = _ =>
+      val name = domain.name
       domain = new Simulation
-      domain.parseData(domain.name)
+      domain.parseData(name)
+      displayMessage("Reset simulation.")
 
 
 
@@ -204,6 +224,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     slider.valueProperty().addListener((_, oldValue, newValue) =>
       dayAdjuster = newValue.intValue()
       dt = (60*60*24*dayAdjuster) / 60
+      displayMessage("Time step adjusted: 1 simulation second = " + dayAdjuster + " days.")
     )
 
 
@@ -212,18 +233,53 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val fileMenu = new Menu("File")
     val viewMenu = new Menu("View")
 
-    //open menu item for opening a new simulation file
+    //open menu item for opening a new simulation file. When open is pressed, a file chooser is opened, and the simulation is reset and the new file is parsed
     val open = new MenuItem("Open")
-    //when open is pressed, a file chooser is opened, and the simulation is reset and the new file is parsed
     open.onAction = _ =>
       val fileChooser = new FileChooser()
       fileChooser.setTitle("Open Simulation File")
       val file = fileChooser.showOpenDialog(stage)
-      if file != null then
-        domain = new Simulation
-        domain.parseData(file.getAbsolutePath())
+      try
+        if file != null then
+          domain = new Simulation
+          domain.parseData(file.getAbsolutePath)
+          displayMessage("Opened simulation: " + file.getAbsolutePath + ".")
+      catch
+        case wrongFileType: IOException =>
+          val alert = new Alert(AlertType.Error)
+          alert.setTitle("Error")
+          alert.setHeaderText("Invalid File Type Error")
+          alert.setContentText("The file you selected is not a valid simulation file. Make sure you've selected a .txt file.")
+          alert.showAndWait()
 
+        case wrongStructure: IllegalArgumentException =>
+          val alert = new Alert(AlertType.Error)
+          val dialogPane = alert.getDialogPane
+          dialogPane.setPrefWidth(800)
+          alert.setTitle("Error")
+          alert.setHeaderText("File Structure Error")
+          alert.setContentText(wrongStructure.getMessage)
+          alert.showAndWait()
+
+
+
+    //save menu item for saving (overwriting) the current simulation. When save is pressed, simulation is saved into a new file using saveData() method. No user input needed
+    val save = new MenuItem("Save")
+    save.onAction = _ =>
+      domain.saveData(domain.name)
+      println("Successfully saved simulation.")
+
+    //save as menu item for saving the current simulation. When save is pressed, simulation is saved into a new file using saveData() method. Should be able to provide a file name
     val saveAs = new MenuItem("Save As")
+    saveAs.onAction = _ =>
+      val fileChooser = new FileChooser()
+      fileChooser.setTitle("Save Simulation File")
+      val file = fileChooser.showSaveDialog(stage)
+      if file != null then
+        domain.saveData(file.getAbsolutePath)
+        displayMessage("Successfully saved simulation.")
+
+
 
     //when directionVectors is checked, the directionVectorsOn variable is set to true, and the direction vectors are drawn
     val directionVectors = new CheckMenuItem("Direction Vectors")
@@ -231,16 +287,20 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       if directionVectors.selected.value then
         domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
         directionVectorsOn = true
+        displayMessage("Direction vectors turned on.")
       else
         directionVectorsOn = false
+        displayMessage("Direction vectors turned off.")
 
     //when accelerationVectors is checked, the accelerationVectorsOn variable is set to true, and the acceleration vectors are drawn
     val accelerationVectors = new CheckMenuItem("Acceleration Vectors")
     accelerationVectors.onAction = _ =>
       if accelerationVectors.selected.value then
         accelerationVectorsOn = true
+        displayMessage("Acceleration vectors turned on.")
       else
         accelerationVectorsOn = false
+        displayMessage("Acceleration vectors turned off.")
 
     //when trajectories is checked, the trajectoriesOn variable is set to true, and the trajectories are drawn, and trajectory buffers are cleared
     val trajectories = new CheckMenuItem("Trajectories")
@@ -248,15 +308,17 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       if trajectories.selected.value then
         domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
         trajectoriesOn = true
+        displayMessage("Trajectories turned on.")
       else
         trajectoriesOn = false
+        displayMessage("Trajectories turned off.")
 
-    fileMenu.items = List(open, new SeparatorMenuItem, saveAs)
+    fileMenu.items = List(open, new SeparatorMenuItem, save, new SeparatorMenuItem, saveAs)
     viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories)
 
     menuBar.menus = List(fileMenu, viewMenu)
 
-    //create a time label that displays domain.time. Should also update when domain.time updates:
+    //time label that displays domain.time. Should also update when domain.time updates:
     val timeProperty = new SimpleDoubleProperty(domain.time)
     val timeLabel = new Label(s"Time: ${domain.time}")
         timeLabel.setLayoutX(110)
@@ -266,18 +328,20 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     timeProperty.addListener((observable, oldValue, newValue) => timeLabel.setText(s"Time: ${newValue.intValue}"))
 
 
-
-
   //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps
     val timer = AnimationTimer(t =>
       if !isPaused && domain.time > 0 && !domain.collision then
         domain.timePasses()
-        stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, drawSimulation())
-        println(domain.collision)
+        stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, drawSimulation())
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
         timeProperty.set(domain.time)
+
+      else if domain.time <= 0 && !isComplete then
+        displayMessage("Simulation complete.")
+        isComplete = true
     )
     timer.start()
+
 
 
 end SolarSystemSimulatorApp

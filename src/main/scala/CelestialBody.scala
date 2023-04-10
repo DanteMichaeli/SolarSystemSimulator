@@ -9,6 +9,9 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
   //var distanceToSun = ??? //distance between the planet's center of mass and the sun's
   var trajectory = Buffer[Vector2D](this.pos) //stores pos vectors through time for drawing trajectories. Starts with the initial position of the body
   var acc: Vector2D = Vector2D(0,0) //will be immediately recalculated with total force acting on the body
+  var colorCode: String = "#" + color.toString.substring(7,13).toUpperCase //used for saving files, converts back from color to hex code
+  val sort: String
+
 
   //calculates force vector acting upon this body due to gravitation from another body
   def gravitationalForce(another: CelestialBody): Vector2D =
@@ -28,7 +31,7 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
   def updateAcceleration(bodies: Buffer[CelestialBody]) =
     this.acc = totalForce(bodies) * (1 / this.mass) // a = F/m = F * 1/m
     this.acc
-    
+
   //compares distance between two bodies to their sum of radii to check for collision
   def isColliding(another: CelestialBody): Boolean =
     val distance = (this.pos - another.pos).magnitude
@@ -39,14 +42,17 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
 
 
 class Sun(name: String, radius: Double, mass: Double, pos: Vector2D, vel: Vector2D, color: scalafx.scene.paint.Color) extends CelestialBody(name, radius, mass, pos, vel, color):
+  val sort = "sun"
 end Sun
 
 
 class Planet(name: String, radius: Double, mass: Double, pos: Vector2D, vel: Vector2D, color: scalafx.scene.paint.Color) extends CelestialBody(name, radius, mass, pos, vel, color):
+  val sort = "pla"
 end Planet
 
 
 class Satellite(name: String, radius: Double, mass: Double, pos: Vector2D, vel: Vector2D, color: scalafx.scene.paint.Color) extends CelestialBody(name, radius, mass, pos, vel, color):
+  val sort = "sat"
 end Satellite
 
 
