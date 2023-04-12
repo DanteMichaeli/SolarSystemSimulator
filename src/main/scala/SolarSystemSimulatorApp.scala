@@ -23,7 +23,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("JupiterLagrangePoints.txt")
+  domain.parseData("theSolarSystem.txt")
   var isComplete = false
 
 
@@ -337,7 +337,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         displayMessage("Trajectories turned off.")
 
     //lagrange lines menu item for toggling the lines on and off
-    val lagrangeLines = new MenuItem("Lagrange Lines")
+    val lagrangeLines = new CheckMenuItem("Lagrange Lines")
     lagrangeLines.onAction = _ =>
       if lagrangeLinesOn then
         lagrangeLinesOn = false
@@ -365,12 +365,13 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps
     val timer = AnimationTimer(t =>
-      if !isPaused && domain.time > 0 /*&& !domain.collision*/ then
+      if !isPaused && domain.time > 0 && !domain.collision then
         domain.timePasses()
         println(domain.celestialBodies(2).totalForce(domain.celestialBodies).magnitude.toString)
         println(domain.celestialBodies(3).totalForce(domain.celestialBodies).magnitude.toString)
         println(domain.celestialBodies(4).totalForce(domain.celestialBodies).magnitude.toString)
-        println(domain.celestialBodies(5).totalForce(domain.celestialBodies).magnitude.toString)
+
+
 
         stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, drawSimulation())
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps

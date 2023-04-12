@@ -13,43 +13,44 @@ class Simulation:
 
   //reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception
   def parseData(fileName: String) =
-    name = fileName
-    val source = scala.io.Source.fromFile(fileName)
-    val lines = source.getLines().toList
-    source.close()
-
-    var counter = 0
-
     try
-      for line <- lines do
-          if counter == 0 then
-            time = line.toDouble //time (in seconds) for how long to run the simulation.
-            counter += 1
-          else if counter == 1 then
-            dayAdjuster = line.toDouble //user-input on dt (in days) for the timestep
-            counter += 1
-          else
-            val cols = line.split(", ").map(_.trim)
-            try
-              if cols(2).toDouble <= 0 then throw new IllegalArgumentException("Non-positive radius error - Make sure none of your radii are negative or zero.")
-              if cols(3).toDouble <= 0 then throw new IllegalArgumentException("Non-positive mass error - Make sure none of your masses are negative or zero.")
-              if cols(4).toDouble < 0 || cols(5).toDouble < 0 then throw new IllegalArgumentException("Negative coordinates error - Make sure none of your initializing coordinates are negative.")
+      name = fileName
+      val source = scala.io.Source.fromFile(fileName)
+      val lines = source.getLines().toList
+      source.close()
+
+      var counter = 0
+        for line <- lines do
+            if counter == 0 then
+              time = line.toDouble //time (in seconds) for how long to run the simulation.
+              if time <= 0 then throw new IllegalArgumentException("Simulation time must be positive.")
+              counter += 1
+            else if counter == 1 then
+              dayAdjuster = line.toDouble //user-input on dt (in days) for the timestep
+              if dayAdjuster <= 0 then throw new IllegalArgumentException("Timestep must be positive.")
+              counter += 1
+            else
+
+              val cols = line.split(", ").map(_.trim)
+
+              if !(cols(0) == "sun" ^ cols(0) == "pla" ^ cols(0) == "sat") then throw new IllegalArgumentException(s"Celestial body ${cols(1)} must either be of type sun, pla or sat.")
+              if cols(2).toDouble <= 0                                     then throw new IllegalArgumentException(s"Radius of ${cols(1)} must be positive.")
+              if cols(3).toDouble <= 0                                     then throw new IllegalArgumentException(s"Mass of ${cols(1)} must be positive.")
+              if cols(4).toDouble < 0 || cols(5).toDouble < 0              then throw new IllegalArgumentException(s"Initial position of ${cols(1)} must not be negative.")
 
               if cols(0) == "sun" then
                 val body = new Sun( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(0,0), Color.web(cols(6)) )
-                celestialBodies += body
-              else if cols(0) == "pla" then
-                val body = new Planet( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
-                celestialBodies += body
-              else
-                val body = new Satellite( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
-                celestialBodies += body
-
-            catch
-              case e: IllegalArgumentException => throw e
-              case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n.\n.\n.")
+                  celestialBodies += body
+                else if cols(0) == "pla" then
+                  val body = new Planet( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+                  celestialBodies += body
+                else
+                  val body = new Satellite( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+                  celestialBodies += body
     catch
-      case _: Exception => throw new IllegalArgumentException("File Structure Error - Make sure your input file has the correct structure:\n\ntime of simulation (s)\ntimestep dt (days)\nplanet type (3-letter), name, mass (kg), radius (m), x position (px), y position (px), x velocity (m/s), y velocity (m/s), color (hex code)\n\nConsider exampleFile.txt for more guidance")
+      case structureError: Exception => throw new IllegalArgumentException("The file could not be parsed properly. Make sure the file follows the correct structure. Consider exampleFile.txt for more guidance.")
+
+
 
 
   //method for writing and saving the simulation data to a .txt file, to be saved on the user's computer. In a format that can be read by the parseData method
