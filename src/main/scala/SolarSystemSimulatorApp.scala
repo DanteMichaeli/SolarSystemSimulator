@@ -23,7 +23,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("theSolarSystem.txt")
+  domain.parseData("JupiterLagrangePoints.txt")
   var isComplete = false
 
 
@@ -90,10 +90,10 @@ object SolarSystemSimulatorApp extends JFXApp3 :
           val arrowheadSize = 5
           val arrowhead = new Polygon()
           arrowhead.getPoints.addAll(endX, endY,
-                                     endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
-                                     endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
-                                     endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
-                                     endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+            endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+            endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+            endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+            endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
           )
           arrowhead.setFill(White)
 
@@ -131,16 +131,37 @@ object SolarSystemSimulatorApp extends JFXApp3 :
           val arrowheadSize = 5
           val arrowhead = new Polygon()
           arrowhead.getPoints.addAll(endX, endY,
-                                     endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
-                                     endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
-                                     endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
-                                     endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+            endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+            endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+            endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+            endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
           )
           arrowhead.setFill(Purple)
 
           // add segment and arrowhead to group
           group.getChildren.addAll(segment, arrowhead)
     group
+
+
+  //method for drawing "Lagrange lines" between all the bodies, used for testing the Lagrange points. So from body 0 to all bodies, from body 1 to all bodies, etc.
+  var lagrangeLinesOn = false
+  def drawLagrangeLines(): Group =
+    val bodies = domain.celestialBodies
+    val group = new Group
+    if lagrangeLinesOn then
+      for n <- bodies.indices do
+        for m <- bodies.indices do
+          if n != m then
+            val line = new Line()
+            line.setStartX(bodies(n).pos.x)
+            line.setStartY(bodies(n).pos.y)
+            line.setEndX(bodies(m).pos.x)
+            line.setEndY(bodies(m).pos.y)
+            line.setStroke(White)
+            line.setStrokeWidth(1)
+            group.getChildren.add(line)
+    group
+
 
 
 
@@ -150,7 +171,8 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val trajectoriesGroup = drawTrajectories()
     val dirVectorsGroup = drawDirVectors()
     val accVectorsGroup = drawAccVectors()
-    val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup)
+    val lagrangeLinesGroup = drawLagrangeLines()
+    val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
     simulationGroup
 
 
@@ -314,8 +336,20 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         trajectoriesOn = false
         displayMessage("Trajectories turned off.")
 
+    //lagrange lines menu item for toggling the lines on and off
+    val lagrangeLines = new MenuItem("Lagrange Lines")
+    lagrangeLines.onAction = _ =>
+      if lagrangeLinesOn then
+        lagrangeLinesOn = false
+        displayMessage("Lagrange lines turned off.")
+      else
+        lagrangeLinesOn = true
+        displayMessage("Lagrange lines turned on.")
+
+
+
     fileMenu.items = List(open, new SeparatorMenuItem, save, new SeparatorMenuItem, saveAs)
-    viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories)
+    viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories, new SeparatorMenuItem, lagrangeLines)
 
     menuBar.menus = List(fileMenu, viewMenu)
 
@@ -331,8 +365,13 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps
     val timer = AnimationTimer(t =>
-      if !isPaused && domain.time > 0 && !domain.collision then
+      if !isPaused && domain.time > 0 /*&& !domain.collision*/ then
         domain.timePasses()
+        println(domain.celestialBodies(2).totalForce(domain.celestialBodies).magnitude.toString)
+        println(domain.celestialBodies(3).totalForce(domain.celestialBodies).magnitude.toString)
+        println(domain.celestialBodies(4).totalForce(domain.celestialBodies).magnitude.toString)
+        println(domain.celestialBodies(5).totalForce(domain.celestialBodies).magnitude.toString)
+
         stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, drawSimulation())
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
         timeProperty.set(domain.time)
