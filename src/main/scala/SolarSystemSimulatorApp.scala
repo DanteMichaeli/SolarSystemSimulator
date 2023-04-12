@@ -15,7 +15,8 @@ import javafx.util.Duration
 import scalafx.scene.control.Alert.AlertType
 import scalafx.stage.FileChooser
 import java.io.IOException
-import scalafx.Includes._
+import scalafx.Includes.*
+import scalafx.stage.FileChooser.ExtensionFilter
 
 
 object SolarSystemSimulatorApp extends JFXApp3 :
@@ -261,27 +262,21 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     open.onAction = _ =>
       val fileChooser = new FileChooser()
       fileChooser.setTitle("Open Simulation File")
+      fileChooser.getExtensionFilters.add(new ExtensionFilter("Text Files", "*.txt"))
       val file = fileChooser.showOpenDialog(stage)
       try
         if file != null then
           domain = new Simulation
           domain.parseData(file.getAbsolutePath)
-          displayMessage("Opened simulation: " + file.getAbsolutePath + ".")
+          displayMessage("Opened simulation: " + domain.name + ".")
       catch
-        case wrongFileType: IOException =>
-          val alert = new Alert(AlertType.Error)
-          alert.setTitle("Error")
-          alert.setHeaderText("Invalid File Type Error")
-          alert.setContentText("The file you selected is not a valid simulation file. Make sure you've selected a .txt file.")
-          alert.showAndWait()
-
-        case wrongStructure: IllegalArgumentException =>
+        case illegalValue: IllegalArgumentException =>
           val alert = new Alert(AlertType.Error)
           val dialogPane = alert.getDialogPane
-          dialogPane.setPrefWidth(800)
           alert.setTitle("Error")
           alert.setHeaderText("File Structure Error")
-          alert.setContentText(wrongStructure.getMessage)
+          dialogPane.setPrefWidth(800)
+          alert.setContentText(illegalValue.getMessage)
           alert.showAndWait()
 
 
