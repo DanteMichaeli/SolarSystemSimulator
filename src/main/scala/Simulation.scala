@@ -13,8 +13,11 @@ class Simulation:
   var collisionData = ""
 
 
-  //reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception
-  def parseData(fileName: String) =
+  //Reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception. The method first checks for immediate illegal values and throws an exception if any are found (negatives, zeros et.c). Furthermore we check outside for the correct format of the file, and throw an exception if the file is not properly formatted.
+  //Main reason is that some requirements, like positive radius, mass or initial position, will not automatically throw exceptions, so we need to explicitly check for them inside the try-catch block.
+  //Like this we achieve the ability to truly cath ALL exceptions we are looking for, and display them both in the terminal on launch and in the GUI when opening a file from within the app.
+
+  def parseData(fileName: String): Unit =
       name = fileName
       val source = scala.io.Source.fromFile(fileName)
       val lines = source.getLines().toList
@@ -62,6 +65,8 @@ class Simulation:
                   else if cols(4).toDouble < 0 || cols(5).toDouble < 0 then s"Initial position of ${cols(1)} must not be negative."
                   else "The file could not be parsed properly. Make sure the file follows the correct structure. Consider exampleFile.txt for more guidance."
                 )
+                case _: Exception => throw new IllegalArgumentException("The file could not be parsed properly. Make sure the file follows the correct structure. Consider exampleFile.txt for more guidance.")
+                
 
 
 
