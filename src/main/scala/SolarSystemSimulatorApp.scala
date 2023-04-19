@@ -28,156 +28,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   var isComplete = false
 
 
-  //method for drawing the celestial bodies of Simulation into the GUI app:
-  def drawBodies(): Group =
-    val bodies = domain.celestialBodies
-    val group = new Group
-    for body <- bodies do
-      val circle = new Circle
-      circle.setCenterX(body.pos.x)
-      circle.setCenterY(body.pos.y)
-      circle.setRadius(body.radius)
-      circle.setFill(body.color)
-      group.getChildren.add(circle)
-    group
-
-
-  //method for tracing the trajectory of all bodies using the bodies' trajectory buffer:
-  var trajectoriesOn = false
-  def drawTrajectories(): Group =
-    if trajectoriesOn then
-      val bodies = domain.celestialBodies
-      val group = new Group
-      for body <- bodies do
-        val polyline = new Polyline()
-        polyline.setStroke(body.color)
-        polyline.setStrokeWidth(1)
-        group.getChildren.add(polyline)
-        for (pos, i) <- body.trajectory.zipWithIndex do
-    //only trace every ith point to improve efficiency
-          if i % 15 == 0 then
-            polyline.getPoints.addAll(pos.x, pos.y)
-      group
-    else
-      val group = new Group
-      group
-
-
-  //method for drawing the direction vectors of all bodies:
-  var directionVectorsOn = false
-  def drawDirVectors(): Group =
-    val bodies = domain.celestialBodies
-    val group = new Group
-    if directionVectorsOn then
-      for n <- bodies.indices do
-        if n > 0 then
-          val direction = bodies(n).vel.normalized
-          val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
-          val arrowLength = bodies(n).radius + 10
-
-          // endpoint of arrow segment
-          val endX = bodies(n).pos.x + direction.x * arrowLength
-          val endY = bodies(n).pos.y + direction.y * arrowLength
-
-          // line segment
-          val segment = new Line()
-          segment.setStartX(bodies(n).pos.x)
-          segment.setStartY(bodies(n).pos.y)
-          segment.setEndX(endX)
-          segment.setEndY(endY)
-          segment.setStroke(White)
-
-          // arrowhead, a triangle pointing in the direction of the velocity vector
-          val arrowheadSize = 5
-          val arrowhead = new Polygon()
-          arrowhead.getPoints.addAll(endX, endY,
-            endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
-            endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
-            endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
-            endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
-          )
-          arrowhead.setFill(White)
-
-          // add segment and arrowhead to group
-          group.getChildren.addAll(segment, arrowhead)
-    group
-
-
-
-  //method for drawing the acceleration vectors of all bodies, just like the direction vectors
-  var accelerationVectorsOn = false
-  def drawAccVectors(): Group =
-    val bodies = domain.celestialBodies
-    val group = new Group
-    if accelerationVectorsOn then
-      for n <- bodies.indices do
-        if n > 0 then
-          val acceleration = bodies(n).acc.normalized
-          val angle = math.atan2(acceleration.y, acceleration.x) * 180 / math.Pi
-          val arrowLength = bodies(n).radius + 10
-
-          // endpoint of arrow segment
-          val endX = bodies(n).pos.x + acceleration.x * arrowLength
-          val endY = bodies(n).pos.y + acceleration.y * arrowLength
-
-          // line segment
-          val segment = new Line()
-          segment.setStartX(bodies(n).pos.x)
-          segment.setStartY(bodies(n).pos.y)
-          segment.setEndX(endX)
-          segment.setEndY(endY)
-          segment.setStroke(Purple)
-
-          // arrowhead, a triangle pointing in the direction of the velocity vector
-          val arrowheadSize = 5
-          val arrowhead = new Polygon()
-          arrowhead.getPoints.addAll(endX, endY,
-            endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
-            endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
-            endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
-            endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
-          )
-          arrowhead.setFill(Purple)
-
-          // add segment and arrowhead to group
-          group.getChildren.addAll(segment, arrowhead)
-    group
-
-
-  //method for drawing "Lagrange lines" between all the bodies, used for testing the Lagrange points. So from body 0 to all bodies, from body 1 to all bodies, etc.
-  var lagrangeLinesOn = false
-  def drawLagrangeLines(): Group =
-    val bodies = domain.celestialBodies
-    val group = new Group
-    if lagrangeLinesOn then
-      for n <- bodies.indices do
-        for m <- bodies.indices do
-          if n != m then
-            val line = new Line()
-            line.setStartX(bodies(n).pos.x)
-            line.setStartY(bodies(n).pos.y)
-            line.setEndX(bodies(m).pos.x)
-            line.setEndY(bodies(m).pos.y)
-            line.setStroke(White)
-            line.setStrokeWidth(1)
-            group.getChildren.add(line)
-    group
-
-
-
-
-  //super group that combines all drawings of bodies, trajectories, vectors et.c.
-  def drawSimulation(): Group =
-    val bodiesGroup = drawBodies()
-    val trajectoriesGroup = drawTrajectories()
-    val dirVectorsGroup = drawDirVectors()
-    val accVectorsGroup = drawAccVectors()
-    val lagrangeLinesGroup = drawLagrangeLines()
-    val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
-    simulationGroup
-
-
-
   override def start(): Unit =
   //ScalaFX stage with all that is needed to display the celestial Bodies in their correct positions
     stage = new JFXApp3.PrimaryStage:
@@ -186,6 +36,168 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       height = GUIheight
       scene = new Scene:
         fill = Color.Black
+
+
+    //info displayer for a celestial body when clicked with mouse
+    var displayedBody: Option[CelestialBody] = None
+
+    val infoDisplayer = new Label("")
+        infoDisplayer.setLayoutX(1150)
+        infoDisplayer.setLayoutY(10)
+        infoDisplayer.setTextFill(White)
+
+    def displayInfo(body: CelestialBody): Unit =
+      infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s")
+
+
+    //method for drawing the celestial bodies of Simulation into the GUI app:
+    def drawBodies(): Group =
+      val bodies = domain.celestialBodies
+      val group = new Group
+      for body <- bodies do
+        val circle = new Circle
+        circle.setCenterX(body.pos.x)
+        circle.setCenterY(body.pos.y)
+        circle.setRadius(body.radius)
+        circle.setFill(body.color)
+        group.getChildren.add(circle)
+        circle.setOnMouseClicked( e => displayInfo(body) )
+      group
+
+
+    //method for tracing the trajectory of all bodies using the bodies' trajectory buffer:
+    var trajectoriesOn = false
+    def drawTrajectories(): Group =
+      if trajectoriesOn then
+        val bodies = domain.celestialBodies
+        val group = new Group
+        for body <- bodies do
+          val polyline = new Polyline()
+          polyline.setStroke(body.color)
+          polyline.setStrokeWidth(1)
+          group.getChildren.add(polyline)
+          for (pos, i) <- body.trajectory.zipWithIndex do
+      //only trace every ith point to improve efficiency
+            if i % 15 == 0 then
+              polyline.getPoints.addAll(pos.x, pos.y)
+        group
+      else
+        val group = new Group
+        group
+
+
+    //method for drawing the direction vectors of all bodies:
+    var directionVectorsOn = false
+    def drawDirVectors(): Group =
+      val bodies = domain.celestialBodies
+      val group = new Group
+      if directionVectorsOn then
+        for n <- bodies.indices do
+          if n > 0 then
+            val direction = bodies(n).vel.normalized
+            val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
+            val arrowLength = bodies(n).radius + 10
+
+            // endpoint of arrow segment
+            val endX = bodies(n).pos.x + direction.x * arrowLength
+            val endY = bodies(n).pos.y + direction.y * arrowLength
+
+            // line segment
+            val segment = new Line()
+            segment.setStartX(bodies(n).pos.x)
+            segment.setStartY(bodies(n).pos.y)
+            segment.setEndX(endX)
+            segment.setEndY(endY)
+            segment.setStroke(White)
+
+            // arrowhead, a triangle pointing in the direction of the velocity vector
+            val arrowheadSize = 5
+            val arrowhead = new Polygon()
+            arrowhead.getPoints.addAll(endX, endY,
+              endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+              endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+              endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+              endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+            )
+            arrowhead.setFill(White)
+
+            // add segment and arrowhead to group
+            group.getChildren.addAll(segment, arrowhead)
+      group
+
+
+
+    //method for drawing the acceleration vectors of all bodies, just like the direction vectors
+    var accelerationVectorsOn = false
+    def drawAccVectors(): Group =
+      val bodies = domain.celestialBodies
+      val group = new Group
+      if accelerationVectorsOn then
+        for n <- bodies.indices do
+          if n > 0 then
+            val acceleration = bodies(n).acc.normalized
+            val angle = math.atan2(acceleration.y, acceleration.x) * 180 / math.Pi
+            val arrowLength = bodies(n).radius + 10
+
+            // endpoint of arrow segment
+            val endX = bodies(n).pos.x + acceleration.x * arrowLength
+            val endY = bodies(n).pos.y + acceleration.y * arrowLength
+
+            // line segment
+            val segment = new Line()
+            segment.setStartX(bodies(n).pos.x)
+            segment.setStartY(bodies(n).pos.y)
+            segment.setEndX(endX)
+            segment.setEndY(endY)
+            segment.setStroke(Purple)
+
+            // arrowhead, a triangle pointing in the direction of the velocity vector
+            val arrowheadSize = 5
+            val arrowhead = new Polygon()
+            arrowhead.getPoints.addAll(endX, endY,
+              endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+              endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+              endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+              endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+            )
+            arrowhead.setFill(Purple)
+
+            // add segment and arrowhead to group
+            group.getChildren.addAll(segment, arrowhead)
+      group
+
+
+    //method for drawing "Lagrange lines" between all the bodies, used for testing the Lagrange points. So from body 0 to all bodies, from body 1 to all bodies, etc.
+    var lagrangeLinesOn = false
+    def drawLagrangeLines(): Group =
+      val bodies = domain.celestialBodies
+      val group = new Group
+      if lagrangeLinesOn then
+        for n <- bodies.indices do
+          for m <- bodies.indices do
+            if n != m then
+              val line = new Line()
+              line.setStartX(bodies(n).pos.x)
+              line.setStartY(bodies(n).pos.y)
+              line.setEndX(bodies(m).pos.x)
+              line.setEndY(bodies(m).pos.y)
+              line.setStroke(White)
+              line.setStrokeWidth(1)
+              group.getChildren.add(line)
+      group
+
+
+    //super group that combines all drawings of bodies, trajectories, vectors et.c.
+    def drawSimulation(): Group =
+      val bodiesGroup = drawBodies()
+      val trajectoriesGroup = drawTrajectories()
+      val dirVectorsGroup = drawDirVectors()
+      val accVectorsGroup = drawAccVectors()
+      val lagrangeLinesGroup = drawLagrangeLines()
+      val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
+      simulationGroup
+
+
 
    //message displayer that displays messages of failed / successful operations. The text should fade away after a few seconds
     val messageDisplayer = new Label("Launched simulator.")
@@ -362,13 +374,8 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val timer = AnimationTimer(t =>
       if !isPaused && domain.time > 0 && !domain.collision then
         domain.timePasses()
-        println(domain.celestialBodies(2).totalForce(domain.celestialBodies).magnitude.toString)
-        println(domain.celestialBodies(3).totalForce(domain.celestialBodies).magnitude.toString)
-        println(domain.celestialBodies(4).totalForce(domain.celestialBodies).magnitude.toString)
 
-
-
-        stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, drawSimulation())
+        stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, infoDisplayer, drawSimulation())
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
         timeProperty.set(domain.time)
 
