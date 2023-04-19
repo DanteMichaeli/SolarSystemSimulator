@@ -46,10 +46,12 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         infoDisplayer.setLayoutY(10)
         infoDisplayer.setTextFill(White)
 
-    def displayInfo: Unit =
-      if displayedBody.isDefined then
+    def displayInfo(): Unit =
+      if displayedBody != None then
         val body = displayedBody.get
         infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s")
+      else
+        infoDisplayer.setText("")
 
 
     //method for drawing the celestial bodies of Simulation into the GUI app:
@@ -63,7 +65,12 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         circle.setRadius(body.radius)
         circle.setFill(body.color)
         group.getChildren.add(circle)
-        circle.setOnMouseClicked( e => displayedBody = Some(body))
+        circle.setOnMouseClicked( e =>
+          if displayedBody == Some(body) then
+            displayedBody = None
+          else
+            displayedBody = Some(body)
+        )
       group
 
 
@@ -378,7 +385,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         domain.timePasses()
 
         stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, infoDisplayer, drawSimulation())
-        displayInfo
+        displayInfo()
         domain.time -= 1.0/60.0   //to account for refresh rate of 60 fps
         timeProperty.set(domain.time)
 
