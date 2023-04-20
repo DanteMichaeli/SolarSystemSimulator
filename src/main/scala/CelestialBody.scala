@@ -4,7 +4,7 @@ import scala.collection.mutable.Buffer
 import scala.math.pow
 
 //mass: kg, radius: m
-abstract class CelestialBody(val name: String, val radius: Double, val mass: Double, var pos: Vector2D, var vel: Vector2D, val color: scalafx.scene.paint.Color):
+abstract class CelestialBody(val name: String, var radius: Double, val mass: Double, var pos: Vector2D, var vel: Vector2D, val color: scalafx.scene.paint.Color):
 
   //var distanceToSun = ??? //distance between the planet's center of mass and the sun's
   var trajectory = Buffer[Vector2D](this.pos) //stores pos vectors through time for drawing trajectories. Starts with the initial position of the body
@@ -43,6 +43,7 @@ abstract class CelestialBody(val name: String, val radius: Double, val mass: Dou
 
 class Sun(name: String, radius: Double, mass: Double, pos: Vector2D, vel: Vector2D, color: scalafx.scene.paint.Color) extends CelestialBody(name, radius, mass, pos, vel, color):
   val sort = "sun"
+
 end Sun
 
 

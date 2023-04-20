@@ -17,7 +17,7 @@ import scalafx.stage.FileChooser
 import java.io.IOException
 import scalafx.Includes.*
 import scalafx.stage.FileChooser.ExtensionFilter
-
+import scalafx.scene.control.TextInputDialog
 
 object SolarSystemSimulatorApp extends JFXApp3 :
 
@@ -47,7 +47,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         infoDisplayer.setTextFill(White)
 
     def displayInfo(): Unit =
-      if displayedBody != None then
+      if displayedBody.isDefined then
         val body = displayedBody.get
         infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s")
       else
@@ -277,6 +277,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val menuBar = new MenuBar
     val fileMenu = new Menu("File")
     val viewMenu = new Menu("View")
+    val editMenu = new Menu("Edit")
 
     //open menu item for opening a new simulation file. When open is pressed, a file chooser is opened, and the simulation is reset and the new file is parsed
     val open = new MenuItem("Open")
@@ -317,6 +318,39 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       if file != null then
         domain.saveData(file.getAbsolutePath)
         displayMessage("Successfully saved simulation.")
+
+
+
+    //button for changing suns' radii
+    val editSunRadii = new MenuItem("Sun radii")
+    editSunRadii.onAction = _ =>
+      val suns = domain.celestialBodies.filter( _.sort == "sun")
+      for sun <- suns do
+        val dialog = new TextInputDialog(sun.radius.toString())
+        dialog.setTitle("Edit Sun Radius")
+        dialog.setHeaderText("Edit Sun Radius")
+        dialog.setContentText("Enter new radius for " + sun.name + ":")
+        val result = dialog.showAndWait()
+        try
+          val newRadius = result.get.toDouble
+          if newRadius <= 0 then
+            throw new IllegalArgumentException
+          else
+            sun.radius = newRadius
+          displayMessage(s"Successfully changed $sun radius to ${sun.radius}.")
+        catch
+          case illegalValue: IllegalArgumentException =>
+            val alert = new Alert(AlertType.Error)
+            val dialogPane = alert.getDialogPane
+            alert.setTitle("Error")
+            alert.setHeaderText("Invalid Input")
+            dialogPane.setPrefWidth(800)
+            alert.setContentText(s"Failed to change radius: ${result.get} is an illegal value. Please enter a number greater than 0.")
+            alert.showAndWait()
+
+
+
+
 
 
 
@@ -366,8 +400,9 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
     fileMenu.items = List(open, new SeparatorMenuItem, save, new SeparatorMenuItem, saveAs)
     viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories, new SeparatorMenuItem, lagrangeLines)
+    editMenu.items = List(editSunRadii)
 
-    menuBar.menus = List(fileMenu, viewMenu)
+    menuBar.menus = List(fileMenu, viewMenu, editMenu)
 
     //time label that displays domain.time. Should also update when domain.time updates:
     val timeProperty = new SimpleDoubleProperty(domain.time)
