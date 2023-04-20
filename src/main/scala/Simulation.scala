@@ -37,7 +37,7 @@ class Simulation:
               val cols = line.split(", ").map(_.trim)
               try
                 if cols(0) == "sun" then
-                  val body = new Sun( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(0,0), Color.web(cols(6)) )
+                  val body = new Sun( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
                   celestialBodies += body
                   if body.radius <= 0 then throw new IllegalArgumentException(s"Radius of ${body.name} must be positive.")
                   if body.mass <= 0 then throw new IllegalArgumentException(s"Mass of ${body.name} must be positive.")

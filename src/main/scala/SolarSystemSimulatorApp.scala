@@ -24,7 +24,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("theSolarSystem.txt")
+  domain.parseData("twoStarSystem.txt")
   var isComplete = false
 
 
@@ -102,7 +102,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       val group = new Group
       if directionVectorsOn then
         for n <- bodies.indices do
-          if n > 0 then
+          if bodies(n).sort != "sun" then
             val direction = bodies(n).vel.normalized
             val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
             val arrowLength = bodies(n).radius + 10
@@ -143,7 +143,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       val group = new Group
       if accelerationVectorsOn then
         for n <- bodies.indices do
-          if n > 0 then
+          if bodies(n).sort != "sun" then
             val acceleration = bodies(n).acc.normalized
             val angle = math.atan2(acceleration.y, acceleration.x) * 180 / math.Pi
             val arrowLength = bodies(n).radius + 10

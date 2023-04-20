@@ -9,3 +9,5 @@ I have managed to ƒamiliarize myself a bit more with ScalaFX.
 I have managed to successfully create and display the first frame of a simulation, where the planets have been instantiated from a properly formatted text file.
 I am trying rn to create an update method that would progress the simulation forward, but to no avail...
 O2 has taken a lot of my time, so I am a bit behind schedule. I will try to catch up.
+
+19.4.2023: report 3 and report 4 have been added as commits to the repository.
