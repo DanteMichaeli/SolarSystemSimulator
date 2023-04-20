@@ -24,7 +24,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("twoStarSystem.txt")
+  domain.parseData("twoStarSystemTwo.txt")
   var isComplete = false
 
 
