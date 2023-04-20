@@ -19,6 +19,7 @@ import scalafx.Includes.*
 import scalafx.stage.FileChooser.ExtensionFilter
 import scalafx.scene.control.TextInputDialog
 
+
 object SolarSystemSimulatorApp extends JFXApp3 :
 
 
@@ -321,8 +322,52 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
+
+    //button for adding a new body mid-simulation
+    val addBody = new MenuItem("Add Celestial Body")
+    addBody.onAction = _ =>
+      val dialog = new TextInputDialog()
+      dialog.setTitle("Add Celestial Body")
+      dialog.setHeaderText("Add Celestial Body")
+      dialog.setContentText("Enter the new body in the format:\nsort, name, radius, mass, x-pos, y-pos, x-vel, y-vel, color code.")
+      val result = dialog.showAndWait()
+      try
+        val cols = result.get.split(",").map(_.trim)
+        if cols.length != 9 then
+          throw new IllegalArgumentException
+        else if cols(2).toDouble <= 0 then
+          throw new IllegalArgumentException(s"Radius of ${cols(1)} must be positive.")
+        else if cols(3).toDouble <= 0 then
+          throw new IllegalArgumentException(s"Mass of ${cols(1)} must be positive.")
+        else if cols(4).toDouble < 0 || cols(5).toDouble < 0 then
+          throw new IllegalArgumentException(s"Initial position of ${cols(1)} must not be negative.")
+        else
+          if cols(0) == "sun" then
+            domain.celestialBodies += Sun(cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)))
+          else if cols(0) == "pla" then
+            domain.celestialBodies += Planet(cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)))
+          else if cols(0) == "sat" then
+            domain.celestialBodies += Satellite(cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)))
+          else
+            throw new IllegalArgumentException(s"Invalid sort: ${cols(0)}. Body must be of sort 'sun', 'pla', or 'sat'.")
+
+          displayMessage(s"Successfully added ${cols(1)}.")
+
+
+      catch
+        case illegalValue: IllegalArgumentException =>
+          val alert = new Alert(AlertType.Error)
+          val dialogPane = alert.getDialogPane
+          alert.setTitle("Error")
+          alert.setHeaderText("Invalid Input")
+          dialogPane.setPrefWidth(800)
+          alert.setContentText(illegalValue.getMessage)
+          alert.showAndWait()
+
+
+
     //button for changing suns' radii
-    val editSunRadii = new MenuItem("Sun radii")
+    val editSunRadii = new MenuItem("Sun Radii")
     editSunRadii.onAction = _ =>
       val suns = domain.celestialBodies.filter( _.sort == "sun")
       for sun <- suns do
@@ -400,7 +445,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
     fileMenu.items = List(open, new SeparatorMenuItem, save, new SeparatorMenuItem, saveAs)
     viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories, new SeparatorMenuItem, lagrangeLines)
-    editMenu.items = List(editSunRadii)
+    editMenu.items = List(addBody, new SeparatorMenuItem, editSunRadii)
 
     menuBar.menus = List(fileMenu, viewMenu, editMenu)
 
