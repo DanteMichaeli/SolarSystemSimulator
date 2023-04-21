@@ -31,11 +31,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   var isComplete = false
 
 
-
-  var minXCompare = 0.0
-  var maxXCompare = GUIwidth
-  var minYCompare = 0.0
-  var maxYCompare = GUIheight
+  var zoomFactor = 1/2.0
 
 
   def outOfBounds(circle: Circle): Boolean =
@@ -43,19 +39,26 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     val rightX = circle.centerX() + circle.radius()
     val topY = circle.centerY() - circle.radius()
     val bottomY = circle.centerY() + circle.radius()
-    leftX < minXCompare || rightX > maxXCompare || topY < minYCompare || bottomY > maxYCompare
+    leftX < 0 || rightX > GUIwidth || topY < 0 || bottomY > GUIheight
 
-  val zoomFactor = 3.0
 
-  //function for zooming out the gui by my zoom factor
+
   def zoomOut(group: Group): Unit =
-    group.scaleX.value /= zoomFactor
-    group.scaleY.value /= zoomFactor
-    val bounds = group.boundsInParent.value
-    val newTranslateX = -bounds.getMinX() + (GUIwidth - bounds.getWidth()) / 2
-    val newTranslateY = -bounds.getMinY() + (GUIheight - bounds.getHeight()) / 2
-    group.translateX.value = newTranslateX
-    group.translateY.value = newTranslateY
+    group.setScaleX(zoomFactor)
+    group.setScaleY(zoomFactor)
+     // Calculate the new bounds of the group
+    val bounds = group.getBoundsInParent
+
+    // Calculate the translation needed to center the group
+    val centerX = (bounds.getMinX + bounds.getMaxX) / 2
+    val centerY = (bounds.getMinY + bounds.getMaxY) / 2
+    val translateX = (GUIwidth / 2) - centerX
+    val translateY = (GUIheight / 2) - centerY
+
+    // Translate the group to center it
+    group.setTranslateX(translateX)
+    group.setTranslateY(translateY)
+
 
 
 
@@ -122,16 +125,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
           else
             displayedBody = Some(body)
         )
-
-      val circlesWithBodies = group.getChildren.zip(bodies)
-      for circleWithBody <- circlesWithBodies do
-        if outOfBounds((circleWithBody._1).asInstanceOf[Circle]) then
-          zoomOut(group)
-       /* maxXCompare = maxXCompare * zoomFactor / 2
-          minXCompare = -maxXCompare
-          maxYCompare = maxYCompare * zoomFactor / 2
-          minYCompare = -maxYCompare */
-          displayMessage(s"Planet ${circleWithBody._2.name} is out of bounds. Zooming out.")
 
       return group
 
@@ -268,6 +261,13 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       val accVectorsGroup = drawAccVectors()
       val lagrangeLinesGroup = drawLagrangeLines()
       val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
+
+
+      val circlesWithBodies = bodiesGroup.getChildren.zip(domain.celestialBodies)
+      for circleWithBody <- circlesWithBodies do
+        if outOfBounds((circleWithBody._1).asInstanceOf[Circle]) then
+          zoomOut(simulationGroup)
+          displayMessage(s"Planet ${circleWithBody._2.name} has ventured out of local scope. Zooming out.")
 
       simulationGroup
 
