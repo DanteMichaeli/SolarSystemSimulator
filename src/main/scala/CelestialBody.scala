@@ -38,6 +38,10 @@ abstract class CelestialBody(val name: String, var radius: Double, val mass: Dou
     val sumOfRadii = this.radius + another.radius
     if distance <= sumOfRadii then true else false
 
+  def distanceTo(other: CelestialBody): Double =
+    val distance = (this.pos - other.pos).magnitude
+    distance
+
 
 
 

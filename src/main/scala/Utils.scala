@@ -10,8 +10,9 @@ var dt: Double = (60*60*24*dayAdjuster) / 60 //larger time-step means faster sim
 
 
 //GUI CONSTANTS
-val GUIwidth: Int = 1600
-val GUIheight: Int = 800
+val GUIwidth: Double = 1500
+val GUIheight: Double = 800
+
 val scalingFactor: Double = 2000000000.00   // 1 pixel = 2 billion meters
 
 //calculates new velocity and position vectors of body based on current position, velocity and acceleration and new acceleration.

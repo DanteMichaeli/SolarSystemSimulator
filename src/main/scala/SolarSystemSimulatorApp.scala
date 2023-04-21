@@ -18,6 +18,8 @@ import java.io.IOException
 import scalafx.Includes.*
 import scalafx.stage.FileChooser.ExtensionFilter
 import scalafx.scene.control.TextInputDialog
+import scalafx.scene.transform.Scale
+import java.math.RoundingMode
 
 
 object SolarSystemSimulatorApp extends JFXApp3 :
@@ -27,6 +29,34 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   var domain = new Simulation
   domain.parseData("theSolarSystem.txt")
   var isComplete = false
+
+
+
+  var minXCompare = 0.0
+  var maxXCompare = GUIwidth
+  var minYCompare = 0.0
+  var maxYCompare = GUIheight
+
+
+  def outOfBounds(circle: Circle): Boolean =
+    val leftX = circle.centerX() - circle.radius()
+    val rightX = circle.centerX() + circle.radius()
+    val topY = circle.centerY() - circle.radius()
+    val bottomY = circle.centerY() + circle.radius()
+    leftX < minXCompare || rightX > maxXCompare || topY < minYCompare || bottomY > maxYCompare
+
+  val zoomFactor = 3.0
+
+  //function for zooming out the gui by my zoom factor
+  def zoomOut(group: Group): Unit =
+    group.scaleX.value /= zoomFactor
+    group.scaleY.value /= zoomFactor
+    val bounds = group.boundsInParent.value
+    val newTranslateX = -bounds.getMinX() + (GUIwidth - bounds.getWidth()) / 2
+    val newTranslateY = -bounds.getMinY() + (GUIheight - bounds.getHeight()) / 2
+    group.translateX.value = newTranslateX
+    group.translateY.value = newTranslateY
+
 
 
   override def start(): Unit =
@@ -39,6 +69,25 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         fill = Color.Black
 
 
+
+   //message displayer that displays messages of failed / successful operations. The text should fade away after a few seconds
+    val messageDisplayer = new Label("Launched simulator.")
+        messageDisplayer.setLayoutX(420)
+        messageDisplayer.setLayoutY(740)
+        messageDisplayer.setTextFill(White)
+
+    val fadeTransition = new FadeTransition(jfxDuration2sfx(Duration.seconds(5)), messageDisplayer)
+    fadeTransition.setToValue(0.0)
+    fadeTransition.play()
+
+    def displayMessage(message: String): Unit =
+      messageDisplayer.setOpacity(100)
+      messageDisplayer.setText(message)
+      fadeTransition.play()
+      fadeTransition.setOnFinished( _ => messageDisplayer.setText("") )
+
+
+
     //info displayer for a celestial body when clicked with mouse
     var displayedBody: Option[CelestialBody] = None
 
@@ -47,10 +96,11 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         infoDisplayer.setLayoutY(10)
         infoDisplayer.setTextFill(White)
 
+
     def displayInfo(): Unit =
       if displayedBody.isDefined then
         val body = displayedBody.get
-        infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s")
+        infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s\nDistance from (largest) sun: ${(body.distanceTo(domain.celestialBodies.filter(_.sort == "sun").maxBy(_.mass))*(scalingFactor/1000.0/149597871.0)).round} AU")
       else
         infoDisplayer.setText("")
 
@@ -72,7 +122,20 @@ object SolarSystemSimulatorApp extends JFXApp3 :
           else
             displayedBody = Some(body)
         )
-      group
+
+      val circlesWithBodies = group.getChildren.zip(bodies)
+      for circleWithBody <- circlesWithBodies do
+        if outOfBounds((circleWithBody._1).asInstanceOf[Circle]) then
+          zoomOut(group)
+       /* maxXCompare = maxXCompare * zoomFactor / 2
+          minXCompare = -maxXCompare
+          maxYCompare = maxYCompare * zoomFactor / 2
+          minYCompare = -maxYCompare */
+          displayMessage(s"Planet ${circleWithBody._2.name} is out of bounds. Zooming out.")
+
+      return group
+
+    end drawBodies
 
 
     //method for tracing the trajectory of all bodies using the bodies' trajectory buffer:
@@ -205,25 +268,8 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       val accVectorsGroup = drawAccVectors()
       val lagrangeLinesGroup = drawLagrangeLines()
       val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
+
       simulationGroup
-
-
-
-   //message displayer that displays messages of failed / successful operations. The text should fade away after a few seconds
-    val messageDisplayer = new Label("Launched simulator.")
-        messageDisplayer.setLayoutX(420)
-        messageDisplayer.setLayoutY(740)
-        messageDisplayer.setTextFill(White)
-
-    val fadeTransition = new FadeTransition(jfxDuration2sfx(Duration.seconds(5)), messageDisplayer)
-    fadeTransition.setToValue(0.0)
-    fadeTransition.play()
-
-    def displayMessage(message: String): Unit =
-      messageDisplayer.setOpacity(100)
-      messageDisplayer.setText(message)
-      fadeTransition.play()
-      fadeTransition.setOnFinished( _ => messageDisplayer.setText("") )
 
 
 
