@@ -35,38 +35,24 @@ class Simulation:
               counter += 1
             else
               val cols = line.split(", ").map(_.trim)
-              try
-                if cols(0) == "sun" then
-                  val body = new Sun( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
-                  celestialBodies += body
-                  if body.radius <= 0 then throw new IllegalArgumentException(s"Radius of ${body.name} must be positive.")
-                  if body.mass <= 0 then throw new IllegalArgumentException(s"Mass of ${body.name} must be positive.")
-                  if body.pos.x < 0 || body.pos.y < 0 then throw new IllegalArgumentException(s"Initial position of ${body.name} must not be negative.")
-
-                else if cols(0) == "pla" then
-                  val body = new Planet( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
-                  celestialBodies += body
-                  if body.radius <= 0 then throw new IllegalArgumentException(s"Radius of ${body.name} must be positive.")
-                  if body.mass <= 0 then throw new IllegalArgumentException(s"Mass of ${body.name} must be positive.")
-                  if body.pos.x < 0 || body.pos.y < 0 then throw new IllegalArgumentException(s"Initial position of ${body.name} must not be negative.")
-
+                if cols.length != 9 then
+                  throw new IllegalArgumentException("Invalid input format. Please enter the new body in the format:\nsort, name, radius, mass, x-pos, y-pos, x-vel, y-vel, color code.")
+                else if cols(2).toDouble <= 0 then
+                  throw new IllegalArgumentException(s"Radius of ${cols(1)} must be positive.")
+                else if cols(3).toDouble <= 0 then
+                  throw new IllegalArgumentException(s"Mass of ${cols(1)} must be positive.")
+                else if cols(4).toDouble < 0 || cols(5).toDouble < 0 then
+                 throw new IllegalArgumentException(s"Initial position of ${cols(1)} must not be negative.")
                 else
-                  val body = new Satellite( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
-                  celestialBodies += body
-                  if body.radius <= 0 then throw new IllegalArgumentException(s"Radius of ${body.name} must be positive.")
-                  if body.mass <= 0 then throw new IllegalArgumentException(s"Mass of ${body.name} must be positive.")
-                  if body.pos.x < 0 || body.pos.y < 0 then throw new IllegalArgumentException(s"Initial position of ${body.name} must not be negative.")
-
-              catch
-                case illegalValue: Exception => throw new IllegalArgumentException(
-                  if !(cols(0) == "sun" ^ cols(0) == "pla" ^ cols(0) == "sat") then "Celestial bodies must either be of type sun, pla or sat."
-                  else if cols(2).toDouble <= 0 then s"Radius of ${cols(1)} must be positive."
-                  else if cols(3).toDouble <= 0 then s"Mass of ${cols(1)} must be positive."
-                  else if cols(4).toDouble < 0 || cols(5).toDouble < 0 then s"Initial position of ${cols(1)} must not be negative."
-                  else "The file could not be parsed properly. Make sure the file follows the correct structure. Consider exampleFile.txt for more guidance."
-                )
-                case _: Exception => throw new IllegalArgumentException("The file could not be parsed properly. Make sure the file follows the correct structure. Consider exampleFile.txt for more guidance.")
-                
+                  if cols(0) == "sun" then
+                    celestialBodies += new Sun( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+                  else if cols(0) == "pla" then
+                    celestialBodies += new Planet( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+                  else if cols(0) == "sat" then
+                    celestialBodies += new Satellite( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
+                  else
+                    throw new IllegalArgumentException(s"Invalid sort: ${cols(0)}. Body must be of sort 'sun', 'pla', or 'sat'.")
+                                
 
 
 
