@@ -31,37 +31,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
   var isComplete = false
 
 
-  var zoomFactor = 1/2.0
-
-
-  def outOfBounds(circle: Circle): Boolean =
-    val leftX = circle.centerX() - circle.radius()
-    val rightX = circle.centerX() + circle.radius()
-    val topY = circle.centerY() - circle.radius()
-    val bottomY = circle.centerY() + circle.radius()
-    leftX < 0 || rightX > GUIwidth || topY < 0 || bottomY > GUIheight
-
-
-
-  def zoomOut(group: Group): Unit =
-    group.setScaleX(zoomFactor)
-    group.setScaleY(zoomFactor)
-     // Calculate the new bounds of the group
-    val bounds = group.getBoundsInParent
-
-    // Calculate the translation needed to center the group
-    val centerX = (bounds.getMinX + bounds.getMaxX) / 2
-    val centerY = (bounds.getMinY + bounds.getMaxY) / 2
-    val translateX = (GUIwidth / 2) - centerX
-    val translateY = (GUIheight / 2) - centerY
-
-    // Translate the group to center it
-    group.setTranslateX(translateX)
-    group.setTranslateY(translateY)
-
-
-
-
   override def start(): Unit =
   //ScalaFX stage with all that is needed to display the celestial Bodies in their correct positions
     stage = new JFXApp3.PrimaryStage:
@@ -92,8 +61,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
     //info displayer for a celestial body when clicked with mouse
-    var displayedBody: Option[CelestialBody] = None
-
     val infoDisplayer = new Label("")
         infoDisplayer.setLayoutX(1250)
         infoDisplayer.setLayoutY(10)
@@ -101,34 +68,12 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
     def displayInfo(): Unit =
-      if displayedBody.isDefined then
-        val body = displayedBody.get
+      if domain.bodyOnDisplay.isDefined then
+        val body = domain.bodyOnDisplay.get
         infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s\nDistance from (largest) sun: ${(body.distanceTo(domain.celestialBodies.filter(_.sort == "sun").maxBy(_.mass))*(scalingFactor/1000.0/149597871.0)).round} AU")
       else
         infoDisplayer.setText("")
 
-
-    //method for drawing the celestial bodies of Simulation into the GUI app:
-    def drawBodies(): Group =
-      val bodies = domain.celestialBodies
-      val group = new Group
-      for body <- bodies do
-        val circle = new Circle
-        circle.setCenterX(body.pos.x)
-        circle.setCenterY(body.pos.y)
-        circle.setRadius(body.radius)
-        circle.setFill(body.color)
-        group.getChildren.add(circle)
-        circle.setOnMouseClicked( e =>
-          if displayedBody == Some(body) then
-            displayedBody = None
-          else
-            displayedBody = Some(body)
-        )
-
-      return group
-
-    end drawBodies
 
 
     //method for tracing the trajectory of all bodies using the bodies' trajectory buffer:
@@ -255,7 +200,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
     //super group that combines all drawings of bodies, trajectories, vectors et.c.
     def drawSimulation(): Group =
-      val bodiesGroup = drawBodies()
+      val bodiesGroup = drawBodies(domain)
       val trajectoriesGroup = drawTrajectories()
       val dirVectorsGroup = drawDirVectors()
       val accVectorsGroup = drawAccVectors()

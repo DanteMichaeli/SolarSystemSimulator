@@ -1,14 +1,16 @@
 //CLASS FOR THE SIMULATION LOGIG. EACH INSTANTIATION REPRESENTS A SINGLE SIMULATION
 import scalafx.scene.paint.Color
-
 import java.io.IOException
 import scala.collection.mutable.Buffer
 import scala.math.{atan, cos, pow, sin, sqrt}
 
 class Simulation:
+  
+
   var name = ""
   var time = 0.00
   val celestialBodies = Buffer[CelestialBody]()
+  var bodyOnDisplay: Option[CelestialBody] = None
   var collision = false
   var collisionData = ""
 
