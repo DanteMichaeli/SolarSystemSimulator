@@ -25,7 +25,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("twoStarSystemTwo.txt")
+  domain.parseData("theSolarSystem.txt")
   var isComplete = false
 
 
@@ -334,7 +334,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       try
         val cols = result.get.split(",").map(_.trim)
         if cols.length != 9 then
-          throw new IllegalArgumentException
+          throw new IllegalArgumentException("Invalid input format. Please enter the new body in the format:\nsort, name, radius, mass, x-pos, y-pos, x-vel, y-vel, color code.")
         else if cols(2).toDouble <= 0 then
           throw new IllegalArgumentException(s"Radius of ${cols(1)} must be positive.")
         else if cols(3).toDouble <= 0 then
@@ -363,6 +363,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
           dialogPane.setPrefWidth(800)
           alert.setContentText(illegalValue.getMessage)
           alert.showAndWait()
+
 
 
 
