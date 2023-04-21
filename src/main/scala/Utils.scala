@@ -5,7 +5,6 @@ import scalafx.scene.Group
 import scalafx.Includes.jfxCircle2sfx
 import scalafx.scene.paint.Color.{Purple, White}
 import scalafx.scene.shape.{Line, Polygon, Polyline}
-
 import scala.math.*
 import scala.collection.mutable.Buffer
 
@@ -109,3 +108,17 @@ def drawVectors(simulation: Simulation, vectorCode: String, color: String, toggl
         group.getChildren.addAll(segment, arrowhead)
   group
 
+def drawLagrangeLines(simulation: Simulation, toggled: Boolean): Group =
+  val group = new Group
+  if toggled then
+    val bodies = simulation.celestialBodies
+    for n <- bodies; m <- bodies if n != m do
+      val line = new Line()
+      line.setStartX(n.pos.x)
+      line.setStartY(n.pos.y)
+      line.setEndX(m.pos.x)
+      line.setEndY(m.pos.y)
+      line.setStroke(White)
+      line.setStrokeWidth(1)
+      group.getChildren.add(line)
+  group

@@ -75,30 +75,14 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         infoDisplayer.setText("")
 
 
+  
 
-    //method for drawing "Lagrange lines" between all the bodies, used for testing the Lagrange points. So from body 0 to all bodies, from body 1 to all bodies, etc.
-    var lagrangeLinesOn = false
-    def drawLagrangeLines(): Group =
-      val bodies = domain.celestialBodies
-      val group = new Group
-      if lagrangeLinesOn then
-        for n <- bodies.indices do
-          for m <- bodies.indices do
-            if n != m then
-              val line = new Line()
-              line.setStartX(bodies(n).pos.x)
-              line.setStartY(bodies(n).pos.y)
-              line.setEndX(bodies(m).pos.x)
-              line.setEndY(bodies(m).pos.y)
-              line.setStroke(White)
-              line.setStrokeWidth(1)
-              group.getChildren.add(line)
-      group
-
-
+//TOGGLES
     var trajectoriesOn = false
     var directionVectorsOn = false
     var accelerationVectorsOn = false
+    var lagrangeLinesOn = false
+
 
 
 
@@ -108,7 +92,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       val trajectoriesGroup = drawTrajectories(domain, trajectoriesOn)
       val dirVectorsGroup = drawVectors(domain, "vel", "white", directionVectorsOn)
       val accVectorsGroup = drawVectors(domain, "acc", "purple", accelerationVectorsOn)
-      val lagrangeLinesGroup = drawLagrangeLines()
+      val lagrangeLinesGroup = drawLagrangeLines(domain, lagrangeLinesOn)
       val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
 
 
