@@ -76,88 +76,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
-
-    //method for drawing the direction vectors of all bodies:
-    var directionVectorsOn = false
-    def drawDirVectors(): Group =
-      val bodies = domain.celestialBodies
-      val group = new Group
-      if directionVectorsOn then
-        for n <- bodies.indices do
-          if bodies(n).sort != "sun" then
-            val direction = bodies(n).vel.normalized
-            val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
-            val arrowLength = bodies(n).radius + 10
-
-            // endpoint of arrow segment
-            val endX = bodies(n).pos.x + direction.x * arrowLength
-            val endY = bodies(n).pos.y + direction.y * arrowLength
-
-            // line segment
-            val segment = new Line()
-            segment.setStartX(bodies(n).pos.x)
-            segment.setStartY(bodies(n).pos.y)
-            segment.setEndX(endX)
-            segment.setEndY(endY)
-            segment.setStroke(White)
-
-            // arrowhead, a triangle pointing in the direction of the velocity vector
-            val arrowheadSize = 5
-            val arrowhead = new Polygon()
-            arrowhead.getPoints.addAll(endX, endY,
-              endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
-              endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
-              endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
-              endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
-            )
-            arrowhead.setFill(White)
-
-            // add segment and arrowhead to group
-            group.getChildren.addAll(segment, arrowhead)
-      group
-
-
-
-    //method for drawing the acceleration vectors of all bodies, just like the direction vectors
-    var accelerationVectorsOn = false
-    def drawAccVectors(): Group =
-      val bodies = domain.celestialBodies
-      val group = new Group
-      if accelerationVectorsOn then
-        for n <- bodies.indices do
-          if bodies(n).sort != "sun" then
-            val acceleration = bodies(n).acc.normalized
-            val angle = math.atan2(acceleration.y, acceleration.x) * 180 / math.Pi
-            val arrowLength = bodies(n).radius + 10
-
-            // endpoint of arrow segment
-            val endX = bodies(n).pos.x + acceleration.x * arrowLength
-            val endY = bodies(n).pos.y + acceleration.y * arrowLength
-
-            // line segment
-            val segment = new Line()
-            segment.setStartX(bodies(n).pos.x)
-            segment.setStartY(bodies(n).pos.y)
-            segment.setEndX(endX)
-            segment.setEndY(endY)
-            segment.setStroke(Purple)
-
-            // arrowhead, a triangle pointing in the direction of the velocity vector
-            val arrowheadSize = 5
-            val arrowhead = new Polygon()
-            arrowhead.getPoints.addAll(endX, endY,
-              endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
-              endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
-              endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
-              endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
-            )
-            arrowhead.setFill(Purple)
-
-            // add segment and arrowhead to group
-            group.getChildren.addAll(segment, arrowhead)
-      group
-
-
     //method for drawing "Lagrange lines" between all the bodies, used for testing the Lagrange points. So from body 0 to all bodies, from body 1 to all bodies, etc.
     var lagrangeLinesOn = false
     def drawLagrangeLines(): Group =
@@ -179,13 +97,17 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
     var trajectoriesOn = false
+    var directionVectorsOn = false
+    var accelerationVectorsOn = false
+
+
 
     //super group that combines all drawings of bodies, trajectories, vectors et.c.
     def drawSimulation(): Group =
       val bodiesGroup = drawBodies(domain)
       val trajectoriesGroup = drawTrajectories(domain, trajectoriesOn)
-      val dirVectorsGroup = drawDirVectors()
-      val accVectorsGroup = drawAccVectors()
+      val dirVectorsGroup = drawVectors(domain, "vel", "white", directionVectorsOn)
+      val accVectorsGroup = drawVectors(domain, "acc", "purple", accelerationVectorsOn)
       val lagrangeLinesGroup = drawLagrangeLines()
       val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
 

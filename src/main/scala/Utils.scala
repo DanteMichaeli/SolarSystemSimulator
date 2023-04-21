@@ -3,7 +3,9 @@ import SolarSystemSimulatorApp.domain
 import javafx.scene.shape.Circle
 import scalafx.scene.Group
 import scalafx.Includes.jfxCircle2sfx
-import scalafx.scene.shape.Polyline
+import scalafx.scene.paint.Color.{Purple, White}
+import scalafx.scene.shape.{Line, Polygon, Polyline}
+
 import scala.math.*
 import scala.collection.mutable.Buffer
 
@@ -60,9 +62,10 @@ def drawBodies(simulation: Simulation): Group =
         simulation.bodyOnDisplay = Some(body)
     )
   group
-  
+
 def drawTrajectories(simulation: Simulation, toggled: Boolean): Group =
-  if !toggled then new Group else
+  val group = new Group
+  if toggled then
     val bodies = simulation.celestialBodies
     val group = new Group
     for body <- bodies do
@@ -71,7 +74,38 @@ def drawTrajectories(simulation: Simulation, toggled: Boolean): Group =
       polyline.setStrokeWidth(1)
       group.getChildren.add(polyline)
       for (pos, i) <- body.trajectory.zipWithIndex do
-        if i % 15 == 0 then                                //only trace every 15th point to reduce lag
-          polyline.getPoints.addAll(pos.x, pos.y)
-    group
- 
+        if i % 15 == 0 then polyline.getPoints.addAll(pos.x, pos.y)  //only trace every 15th point to reduce lag
+  group
+
+def drawVectors(simulation: Simulation, vectorCode: String, color: String, toggled: Boolean): Group =
+  val group = new Group
+  if toggled then
+    val bodies = simulation.celestialBodies
+    for body <- bodies do
+      if body.sort != "sun" then
+        val direction = if vectorCode == "vel" then body.vel.normalized else body.acc.normalized
+        val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
+        val arrowLength = body.radius + 10
+        //endpoint of arrow
+        val endX = body.pos.x + direction.x * arrowLength
+        val endY = body.pos.y + direction.y * arrowLength
+        //line segment
+        val segment = new Line()
+        segment.setStartX(body.pos.x)
+        segment.setStartY(body.pos.y)
+        segment.setEndX(endX)
+        segment.setEndY(endY)
+        segment.setStroke(if color == "white" then White else Purple)
+        //arrowhead, a triangle pointing in the direction of the vector
+        val arrowheadSize = 5
+        val arrowhead = new Polygon()
+        arrowhead.getPoints.addAll(endX, endY,
+          endX-arrowheadSize*math.cos(angle*math.Pi/180+math.Pi/6),
+          endY-arrowheadSize*math.sin(angle*math.Pi/180+math.Pi/6),
+          endX-arrowheadSize*math.cos(angle*math.Pi/180-math.Pi/6),
+          endY-arrowheadSize*math.sin(angle*math.Pi/180-math.Pi/6)
+        )
+        arrowhead.setFill(if color == "white" then White else Purple)
+        group.getChildren.addAll(segment, arrowhead)
+  group
+
