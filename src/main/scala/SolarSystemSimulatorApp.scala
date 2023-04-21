@@ -76,26 +76,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
-    //method for tracing the trajectory of all bodies using the bodies' trajectory buffer:
-    var trajectoriesOn = false
-    def drawTrajectories(): Group =
-      if trajectoriesOn then
-        val bodies = domain.celestialBodies
-        val group = new Group
-        for body <- bodies do
-          val polyline = new Polyline()
-          polyline.setStroke(body.color)
-          polyline.setStrokeWidth(1)
-          group.getChildren.add(polyline)
-          for (pos, i) <- body.trajectory.zipWithIndex do
-      //only trace every ith point to improve efficiency
-            if i % 15 == 0 then
-              polyline.getPoints.addAll(pos.x, pos.y)
-        group
-      else
-        val group = new Group
-        group
-
 
     //method for drawing the direction vectors of all bodies:
     var directionVectorsOn = false
@@ -198,10 +178,12 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       group
 
 
+    var trajectoriesOn = false
+
     //super group that combines all drawings of bodies, trajectories, vectors et.c.
     def drawSimulation(): Group =
       val bodiesGroup = drawBodies(domain)
-      val trajectoriesGroup = drawTrajectories()
+      val trajectoriesGroup = drawTrajectories(domain, trajectoriesOn)
       val dirVectorsGroup = drawDirVectors()
       val accVectorsGroup = drawAccVectors()
       val lagrangeLinesGroup = drawLagrangeLines()
