@@ -27,7 +27,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("theSolarSystem.txt")
+  domain.parseData("solarTest0.txt")
   var isComplete = false
 
 
@@ -42,40 +42,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
 
 
-   //message displayer that displays messages of failed / successful operations. The text should fade away after a few seconds
-    val messageDisplayer = new Label("Launched simulator.")
-        messageDisplayer.setLayoutX(420)
-        messageDisplayer.setLayoutY(740)
-        messageDisplayer.setTextFill(White)
-
-    val fadeTransition = new FadeTransition(jfxDuration2sfx(Duration.seconds(5)), messageDisplayer)
-    fadeTransition.setToValue(0.0)
-    fadeTransition.play()
-
-    def displayMessage(message: String): Unit =
-      messageDisplayer.setOpacity(100)
-      messageDisplayer.setText(message)
-      fadeTransition.play()
-      fadeTransition.setOnFinished( _ => messageDisplayer.setText("") )
-
-
-
-    //info displayer for a celestial body when clicked with mouse
-    val infoDisplayer = new Label("")
-        infoDisplayer.setLayoutX(1250)
-        infoDisplayer.setLayoutY(10)
-        infoDisplayer.setTextFill(White)
-
-
-    def displayInfo(): Unit =
-      if domain.bodyOnDisplay.isDefined then
-        val body = domain.bodyOnDisplay.get
-        infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s\nDistance from (largest) sun: ${(body.distanceTo(domain.celestialBodies.filter(_.sort == "sun").maxBy(_.mass))*(scalingFactor/1000.0/149597871.0)).round} AU")
-      else
-        infoDisplayer.setText("")
-
-
-  
 
 //TOGGLES
     var trajectoriesOn = false
@@ -84,9 +50,6 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     var lagrangeLinesOn = false
 
 
-
-
-    //super group that combines all drawings of bodies, trajectories, vectors et.c.
     def drawSimulation(): Group =
       val bodiesGroup = drawBodies(domain)
       val trajectoriesGroup = drawTrajectories(domain, trajectoriesOn)
@@ -94,16 +57,14 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       val accVectorsGroup = drawVectors(domain, "acc", "purple", accelerationVectorsOn)
       val lagrangeLinesGroup = drawLagrangeLines(domain, lagrangeLinesOn)
       val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
-
-
       val circlesWithBodies = bodiesGroup.getChildren.zip(domain.celestialBodies)
       for circleWithBody <- circlesWithBodies do
         if outOfBounds((circleWithBody._1).asInstanceOf[Circle]) then
           zoomOut(simulationGroup)
           displayMessage(s"Planet ${circleWithBody._2.name} has ventured out of local scope. Zooming out.")
-
       simulationGroup
 
+    setupDisplays()
 
 
   // play/pause button for the gui:
@@ -153,126 +114,12 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     )
 
 
-    //menu bar with menus:
-    val menuBar = new MenuBar
-    val fileMenu = new Menu("File")
-    val viewMenu = new Menu("View")
-    val editMenu = new Menu("Edit")
 
-    //open menu item for opening a new simulation file. When open is pressed, a file chooser is opened, and the simulation is reset and the new file is parsed
-    val open = new MenuItem("Open")
-    open.onAction = _ =>
-      val fileChooser = new FileChooser()
-      fileChooser.setTitle("Open Simulation File")
-      fileChooser.getExtensionFilters.add(new ExtensionFilter("Text Files", "*.txt"))
-      val file = fileChooser.showOpenDialog(stage)
-      try
-        if file != null then
-          domain = new Simulation
-          domain.parseData(file.getAbsolutePath)
-          displayMessage("Opened simulation: " + domain.name + ".")
-      catch
-        case illegalValue: IllegalArgumentException =>
-          val alert = new Alert(AlertType.Error)
-          val dialogPane = alert.getDialogPane
-          alert.setTitle("Error")
-          alert.setHeaderText("File Structure Error")
-          dialogPane.setPrefWidth(800)
-          alert.setContentText(illegalValue.getMessage)
-          alert.showAndWait()
-
-
-
-    //save menu item for saving (overwriting) the current simulation. When save is pressed, simulation is saved into a new file using saveData() method. No user input needed
-    val save = new MenuItem("Save")
-    save.onAction = _ =>
-      domain.saveData(domain.name)
-      println("Successfully saved simulation.")
-
-    //save as menu item for saving the current simulation. When save is pressed, simulation is saved into a new file using saveData() method. Should be able to provide a file name
-    val saveAs = new MenuItem("Save As")
-    saveAs.onAction = _ =>
-      val fileChooser = new FileChooser()
-      fileChooser.setTitle("Save Simulation File")
-      val file = fileChooser.showSaveDialog(stage)
-      if file != null then
-        domain.saveData(file.getAbsolutePath)
-        displayMessage("Successfully saved simulation.")
-
-
-
-
-    //button for adding a new body mid-simulation
-    val addBody = new MenuItem("Add Celestial Body")
-    addBody.onAction = _ =>
-      val dialog = new TextInputDialog()
-      dialog.setTitle("Add Celestial Body")
-      dialog.setHeaderText("Add Celestial Body")
-      dialog.setContentText("Enter the new body in the format:\nsort, name, radius, mass, x-pos, y-pos, x-vel, y-vel, color code.")
-      val result = dialog.showAndWait()
-      try
-        val cols = result.get.split(",").map(_.trim)
-        if cols.length != 9 then
-          throw new IllegalArgumentException("Invalid input format. Please enter the new body in the format:\nsort, name, radius, mass, x-pos, y-pos, x-vel, y-vel, color code.")
-        else if cols(2).toDouble <= 0 then
-          throw new IllegalArgumentException(s"Radius of ${cols(1)} must be positive.")
-        else if cols(3).toDouble <= 0 then
-          throw new IllegalArgumentException(s"Mass of ${cols(1)} must be positive.")
-        else if cols(4).toDouble < 0 || cols(5).toDouble < 0 then
-          throw new IllegalArgumentException(s"Initial position of ${cols(1)} must not be negative.")
-        else
-          if cols(0) == "sun" then
-            domain.celestialBodies += Sun(cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)))
-          else if cols(0) == "pla" then
-            domain.celestialBodies += Planet(cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)))
-          else if cols(0) == "sat" then
-            domain.celestialBodies += Satellite(cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)))
-          else
-            throw new IllegalArgumentException(s"Invalid sort: ${cols(0)}. Body must be of sort 'sun', 'pla', or 'sat'.")
-
-          displayMessage(s"Successfully added ${cols(1)}.")
-
-
-      catch
-        case illegalValue: IllegalArgumentException =>
-          val alert = new Alert(AlertType.Error)
-          val dialogPane = alert.getDialogPane
-          alert.setTitle("Error")
-          alert.setHeaderText("Invalid Input")
-          dialogPane.setPrefWidth(800)
-          alert.setContentText(illegalValue.getMessage)
-          alert.showAndWait()
-
-
-
-
-    //button for changing suns' radii
-    val editSunRadii = new MenuItem("Sun Radii")
-    editSunRadii.onAction = _ =>
-      val suns = domain.celestialBodies.filter( _.sort == "sun")
-      for sun <- suns do
-        val dialog = new TextInputDialog(sun.radius.toString())
-        dialog.setTitle("Edit Sun Radius")
-        dialog.setHeaderText("Edit Sun Radius")
-        dialog.setContentText("Enter new radius for " + sun.name + ":")
-        val result = dialog.showAndWait()
-        try
-          val newRadius = result.get.toDouble
-          if newRadius <= 0 then
-            throw new IllegalArgumentException
-          else
-            sun.radius = newRadius
-          displayMessage(s"Successfully changed $sun radius to ${sun.radius}.")
-        catch
-          case illegalValue: IllegalArgumentException =>
-            val alert = new Alert(AlertType.Error)
-            val dialogPane = alert.getDialogPane
-            alert.setTitle("Error")
-            alert.setHeaderText("Invalid Input")
-            dialogPane.setPrefWidth(800)
-            alert.setContentText(s"Failed to change radius: ${result.get} is an illegal value. Please enter a number greater than 0.")
-            alert.showAndWait()
-
+    open.onAction = _ => openSimulation()
+    save.onAction = _ => saveSimulation()
+    saveAs.onAction = _ => saveAsSimulation()
+    addBody.onAction = _ => addBodySimulation()
+    editSunRadii.onAction = _ => editSunRadiiSimulation()
 
 
 

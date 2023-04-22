@@ -5,7 +5,7 @@ import scala.collection.mutable.Buffer
 import scala.math.{atan, cos, pow, sin, sqrt}
 
 class Simulation:
-  
+
 
   var name = ""
   var time = 0.00
@@ -54,7 +54,7 @@ class Simulation:
                     celestialBodies += new Satellite( cols(1), cols(2).toDouble, cols(3).toDouble, Vector2D(cols(4).toDouble, cols(5).toDouble), Vector2D(cols(6).toDouble, cols(7).toDouble), Color.web(cols(8)) )
                   else
                     throw new IllegalArgumentException(s"Invalid sort: ${cols(0)}. Body must be of sort 'sun', 'pla', or 'sat'.")
-                                
+
 
 
 
@@ -67,9 +67,7 @@ class Simulation:
     bw.write(time.toString + "\n")
     bw.write(dayAdjuster.toString + "\n")
     for n <- celestialBodies.indices do
-      if n == 0 then
-        bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).colorCode}\n")
-      else if n == celestialBodies.length-1 then
+      if n == celestialBodies.length-1 then
         bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).vel.x}, ${celestialBodies(n).vel.y}, ${celestialBodies(n).colorCode}")
       else
         bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).vel.x}, ${celestialBodies(n).vel.y}, ${celestialBodies(n).colorCode}\n")

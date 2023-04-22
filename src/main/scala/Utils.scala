@@ -5,9 +5,10 @@ import scalafx.scene.Group
 import scalafx.Includes.jfxCircle2sfx
 import scalafx.scene.paint.Color.{Purple, White}
 import scalafx.scene.shape.{Line, Polygon, Polyline}
+import scala.collection.mutable
 import scala.math.*
 import scala.collection.mutable.Buffer
-
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //PHYSICS CONSTANTS:
 val G = 6.6743*pow(10,-11) //m^3 * kg^(-1) * s^(-2)
 var dayAdjuster = 10.0
@@ -18,7 +19,7 @@ def velocityVerlet(currentPos: Vector2D, currentVel: Vector2D, currentAcc: Vecto
   val newPos = currentPos + (currentVel * dt + currentAcc * pow(dt,2) * 0.5) * (1 / scalingFactor)
   val newVel = currentVel + (currentAcc + newAcc) * dt * 0.5
   (newPos, newVel)
-
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //GUI CONSTANTS
 val GUIwidth: Double = 1500
 val GUIheight: Double = 800
@@ -45,9 +46,8 @@ def zoomOut(group: Group): Unit =
   group.setTranslateY(translateY)
 
 def drawBodies(simulation: Simulation): Group =
-  val bodies = simulation.celestialBodies
   val group = new Group
-  for body <- bodies do
+  for body <- simulation.celestialBodies do
     val circle = new Circle
     circle.setCenterX(body.pos.x)
     circle.setCenterY(body.pos.y)
@@ -65,9 +65,7 @@ def drawBodies(simulation: Simulation): Group =
 def drawTrajectories(simulation: Simulation, toggled: Boolean): Group =
   val group = new Group
   if toggled then
-    val bodies = simulation.celestialBodies
-    val group = new Group
-    for body <- bodies do
+    for body <- simulation.celestialBodies do
       val polyline = new Polyline()
       polyline.setStroke(body.color)
       polyline.setStrokeWidth(1)
@@ -79,8 +77,7 @@ def drawTrajectories(simulation: Simulation, toggled: Boolean): Group =
 def drawVectors(simulation: Simulation, vectorCode: String, color: String, toggled: Boolean): Group =
   val group = new Group
   if toggled then
-    val bodies = simulation.celestialBodies
-    for body <- bodies do
+    for body <- simulation.celestialBodies do
       if body.sort != "sun" then
         val direction = if vectorCode == "vel" then body.vel.normalized else body.acc.normalized
         val angle = math.atan2(direction.y, direction.x) * 180 / math.Pi
