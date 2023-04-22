@@ -62,9 +62,9 @@ def drawBodies(simulation: Simulation): Group =
     )
   group
 
-def drawTrajectories(simulation: Simulation, toggled: Boolean): Group =
+def drawTrajectories(simulation: Simulation): Group =
   val group = new Group
-  if toggled then
+  if simulation.trajectoriesOn then
     for body <- simulation.celestialBodies do
       val polyline = new Polyline()
       polyline.setStroke(body.color)
@@ -105,9 +105,10 @@ def drawVectors(simulation: Simulation, vectorCode: String, color: String, toggl
         group.getChildren.addAll(segment, arrowhead)
   group
 
-def drawLagrangeLines(simulation: Simulation, toggled: Boolean): Group =
+
+def drawLagrangeLines(simulation: Simulation): Group =
   val group = new Group
-  if toggled then
+  if simulation.lagrangeLinesOn then
     val bodies = simulation.celestialBodies
     for n <- bodies; m <- bodies if n != m do
       val line = new Line()

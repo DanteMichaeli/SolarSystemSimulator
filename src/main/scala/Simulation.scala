@@ -6,13 +6,18 @@ import scala.math.{atan, cos, pow, sin, sqrt}
 
 class Simulation:
 
-
   var name = ""
   var time = 0.00
   val celestialBodies = Buffer[CelestialBody]()
   var bodyOnDisplay: Option[CelestialBody] = None
   var collision = false
   var collisionData = ""
+  
+  //GUI TOGGLES
+  var trajectoriesOn = false
+  var directionVectorsOn = false
+  var accelerationVectorsOn = false
+  var lagrangeLinesOn = false
 
 
   //Reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception. The method first checks for immediate illegal values and throws an exception if any are found (negatives, zeros et.c). Furthermore we check outside for the correct format of the file, and throw an exception if the file is not properly formatted.

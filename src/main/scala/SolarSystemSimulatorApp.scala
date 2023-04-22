@@ -27,7 +27,7 @@ object SolarSystemSimulatorApp extends JFXApp3 :
 
   //domain of the simulation
   var domain = new Simulation
-  domain.parseData("solarTest0.txt")
+  domain.parseData("theSolarSystem.txt")
   var isComplete = false
 
 
@@ -41,21 +41,13 @@ object SolarSystemSimulatorApp extends JFXApp3 :
         fill = Color.Black
 
 
-
-
-//TOGGLES
-    var trajectoriesOn = false
-    var directionVectorsOn = false
-    var accelerationVectorsOn = false
-    var lagrangeLinesOn = false
-
-
     def drawSimulation(): Group =
+
       val bodiesGroup = drawBodies(domain)
-      val trajectoriesGroup = drawTrajectories(domain, trajectoriesOn)
-      val dirVectorsGroup = drawVectors(domain, "vel", "white", directionVectorsOn)
-      val accVectorsGroup = drawVectors(domain, "acc", "purple", accelerationVectorsOn)
-      val lagrangeLinesGroup = drawLagrangeLines(domain, lagrangeLinesOn)
+      val trajectoriesGroup = drawTrajectories(domain)
+      val dirVectorsGroup = drawVectors(domain, "vel", "white", domain.directionVectorsOn)
+      val accVectorsGroup = drawVectors(domain, "acc", "purple", domain.accelerationVectorsOn)
+      val lagrangeLinesGroup = drawLagrangeLines(domain)
       val simulationGroup = new Group(bodiesGroup, trajectoriesGroup, dirVectorsGroup, accVectorsGroup, lagrangeLinesGroup)
       val circlesWithBodies = bodiesGroup.getChildren.zip(domain.celestialBodies)
       for circleWithBody <- circlesWithBodies do
@@ -113,77 +105,10 @@ object SolarSystemSimulatorApp extends JFXApp3 :
       displayMessage("Time step adjusted: 1 simulation second = " + dayAdjuster + " days.")
     )
 
+    setupMenu()
+    actionSetup()
 
 
-    open.onAction = _ => openSimulation()
-    save.onAction = _ => saveSimulation()
-    saveAs.onAction = _ => saveAsSimulation()
-    addBody.onAction = _ => addBodySimulation()
-    editSunRadii.onAction = _ => editSunRadiiSimulation()
-
-
-
-
-
-
-    //when directionVectors is checked, the directionVectorsOn variable is set to true, and the direction vectors are drawn
-    val directionVectors = new CheckMenuItem("Direction Vectors")
-    directionVectors.onAction = _ =>
-      if directionVectors.selected.value then
-        domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
-        directionVectorsOn = true
-        displayMessage("Direction vectors turned on.")
-      else
-        directionVectorsOn = false
-        displayMessage("Direction vectors turned off.")
-
-    //when accelerationVectors is checked, the accelerationVectorsOn variable is set to true, and the acceleration vectors are drawn
-    val accelerationVectors = new CheckMenuItem("Acceleration Vectors")
-    accelerationVectors.onAction = _ =>
-      if accelerationVectors.selected.value then
-        accelerationVectorsOn = true
-        displayMessage("Acceleration vectors turned on.")
-      else
-        accelerationVectorsOn = false
-        displayMessage("Acceleration vectors turned off.")
-
-    //when trajectories is checked, the trajectoriesOn variable is set to true, and the trajectories are drawn, and trajectory buffers are cleared
-    val trajectories = new CheckMenuItem("Trajectories")
-    trajectories.onAction = _ =>
-      if trajectories.selected.value then
-        domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
-        trajectoriesOn = true
-        displayMessage("Trajectories turned on.")
-      else
-        trajectoriesOn = false
-        displayMessage("Trajectories turned off.")
-
-    //lagrange lines menu item for toggling the lines on and off
-    val lagrangeLines = new CheckMenuItem("Lagrange Lines")
-    lagrangeLines.onAction = _ =>
-      if lagrangeLinesOn then
-        lagrangeLinesOn = false
-        displayMessage("Lagrange lines turned off.")
-      else
-        lagrangeLinesOn = true
-        displayMessage("Lagrange lines turned on.")
-
-
-
-    fileMenu.items = List(open, new SeparatorMenuItem, save, new SeparatorMenuItem, saveAs)
-    viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories, new SeparatorMenuItem, lagrangeLines)
-    editMenu.items = List(addBody, new SeparatorMenuItem, editSunRadii)
-
-    menuBar.menus = List(fileMenu, viewMenu, editMenu)
-
-    //time label that displays domain.time. Should also update when domain.time updates:
-    val timeProperty = new SimpleDoubleProperty(domain.time)
-    val timeLabel = new Label(s"Time: ${domain.time}")
-        timeLabel.setLayoutX(110)
-        timeLabel.setLayoutY(742.5)
-        timeLabel.setTextFill(White)
-    timeLabel.textProperty().bind(timeProperty.asString("Time: %.1f"))
-    timeProperty.addListener((observable, oldValue, newValue) => timeLabel.setText(s"Time: ${newValue.intValue}"))
 
 
   //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps

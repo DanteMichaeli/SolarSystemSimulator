@@ -1,9 +1,11 @@
 import SolarSystemSimulatorApp.{domain, stage}
 import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.{Alert, Menu, MenuBar, MenuItem, TextInputDialog}
+import scalafx.scene.control.{Alert, CheckMenuItem, Menu, MenuBar, MenuItem, SeparatorMenuItem, TextInputDialog}
 import scalafx.scene.paint.Color
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
+
+import scala.collection.mutable
 
 val menuBar = new MenuBar
 val fileMenu = new Menu("File")
@@ -14,12 +16,10 @@ val save = new MenuItem("Save")                   //overwrites current file
 val saveAs = new MenuItem("Save As")              //saves as new file
 val addBody = new MenuItem("Add Celestial Body")
 val editSunRadii = new MenuItem("Sun Radii")
-
-
-
-
-
-
+val directionVectors = new CheckMenuItem("Direction Vectors")
+val accelerationVectors = new CheckMenuItem("Acceleration Vectors")
+val trajectories = new CheckMenuItem("Trajectories")
+val lagrangeLines = new CheckMenuItem("Lagrange Lines")
 
 
 //METHODS FOR MENU ITEMS
@@ -115,3 +115,56 @@ def editSunRadiiSimulation(): Unit =
           dialogPane.setPrefWidth(800)
           alert.setContentText(s"Failed to change radius: ${result.get} is an illegal value. Please enter a number greater than 0.")
           alert.showAndWait()
+
+def directionVectorsSimulation(): Unit =
+  if directionVectors.selected.value then
+    domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
+    domain.directionVectorsOn = true
+    displayMessage("Direction vectors turned on.")
+  else
+    domain.directionVectorsOn = false
+    displayMessage("Direction vectors turned off.")
+
+def accelerationVectorsSimulation(): Unit =
+  if accelerationVectors.selected.value then
+    domain.accelerationVectorsOn = true
+    displayMessage("Acceleration vectors turned on.")
+  else
+    domain.accelerationVectorsOn = false
+    displayMessage("Acceleration vectors turned off.")
+
+def trajectoriesSimulation(): Unit =
+  if trajectories.selected.value then
+    domain.celestialBodies.foreach( (body: CelestialBody) => body.trajectory = mutable.Buffer(body.trajectory.last))
+    domain.trajectoriesOn = true
+    displayMessage("Trajectories turned on.")
+  else
+    domain.trajectoriesOn = false
+    displayMessage("Trajectories turned off.")
+
+def lagrangeLinesSimulation(): Unit =
+  if lagrangeLines.selected.value then
+    domain.lagrangeLinesOn = true
+    displayMessage("Lagrange lines turned on.")
+  else
+    domain.lagrangeLinesOn = false
+    displayMessage("Lagrange lines turned off.")
+
+def setupMenu(): Unit =
+  fileMenu.items = List(open, new SeparatorMenuItem, save, new SeparatorMenuItem, saveAs)
+  editMenu.items = List(addBody, new SeparatorMenuItem, editSunRadii)
+  viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories, new SeparatorMenuItem, lagrangeLines)
+  menuBar.menus = List(fileMenu, editMenu, viewMenu)
+
+def actionSetup(): Unit =
+  open.onAction = _ => openSimulation()
+  save.onAction = _ => saveSimulation()
+  saveAs.onAction = _ => saveAsSimulation()
+  addBody.onAction = _ => addBodySimulation()
+  editSunRadii.onAction = _ => editSunRadiiSimulation()
+  directionVectors.onAction = _ => directionVectorsSimulation()
+  accelerationVectors.onAction = _ => accelerationVectorsSimulation()
+  trajectories.onAction = _ => trajectoriesSimulation()
+  lagrangeLines.onAction = _ => lagrangeLinesSimulation()
+
+

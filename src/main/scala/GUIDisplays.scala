@@ -1,4 +1,5 @@
 import SolarSystemSimulatorApp.domain
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.util.Duration
 import scalafx.Includes.jfxDuration2sfx
 import scalafx.animation.FadeTransition
@@ -22,9 +23,12 @@ def displayInfo(): Unit =
     val body = domain.bodyOnDisplay.get
     infoDisplayer.setText(s"Name: ${body.name}\nType: ${if body.sort == "sat" then "satellite" else if body.sort == "pla" then "planet" else body.sort}\nMass: ${body.mass} kg\nSimulation radius: ${body.radius} px\nPosition:  X: ${body.pos.x.round}, Y: ${body.pos.y.round}\nOrbital velocity: ${body.vel.magnitude.round} m/s\nDistance from (largest) sun: ${(body.distanceTo(domain.celestialBodies.filter(_.sort == "sun").maxBy(_.mass))*(scalingFactor/1000.0/149597871.0)).round} AU")
 
+//TIME DISPLAYER
+val timeProperty = new SimpleDoubleProperty(domain.time)
+val timeLabel = new Label(s"Time: ${domain.time}")
 
 //SET UP METHOD
-def setupDisplays() = 
+def setupDisplays(): Unit = 
   messageDisplayer.setLayoutX(420)
   messageDisplayer.setLayoutY(740)
   messageDisplayer.setTextFill(White)
@@ -33,3 +37,9 @@ def setupDisplays() =
   infoDisplayer.setLayoutX(1250)
   infoDisplayer.setLayoutY(10)
   infoDisplayer.setTextFill(White)
+  timeLabel.setLayoutX(110)
+  timeLabel.setLayoutY(742.5)
+  timeLabel.setTextFill(White)
+  timeLabel.textProperty().bind(timeProperty.asString("Time: %.1f"))
+  timeProperty.addListener((observable, oldValue, newValue) => timeLabel.setText(s"Time: ${newValue.intValue}"))
+
