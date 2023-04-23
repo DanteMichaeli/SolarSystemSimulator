@@ -6,7 +6,6 @@ import scalafx.animation.FadeTransition
 import scalafx.scene.control.Label
 import scalafx.scene.paint.Color.White
 
-
 //MESSAGE DISPLAYER
 val messageDisplayer = new Label("Launched simulator.")
 val fadeTransition = new FadeTransition(jfxDuration2sfx(Duration.seconds(5)), messageDisplayer)
@@ -28,7 +27,7 @@ val timeProperty = new SimpleDoubleProperty(domain.time)
 val timeLabel = new Label(s"Time: ${domain.time}")
 
 //SET UP METHOD
-def setupDisplays(): Unit = 
+def setupDisplays(): Unit =
   messageDisplayer.setLayoutX(420)
   messageDisplayer.setLayoutY(740)
   messageDisplayer.setTextFill(White)
@@ -41,5 +40,3 @@ def setupDisplays(): Unit =
   timeLabel.setLayoutY(742.5)
   timeLabel.setTextFill(White)
   timeLabel.textProperty().bind(timeProperty.asString("Time: %.1f"))
-  timeProperty.addListener((observable, oldValue, newValue) => timeLabel.setText(s"Time: ${newValue.intValue}"))
-

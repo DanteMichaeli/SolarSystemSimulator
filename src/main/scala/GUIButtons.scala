@@ -22,6 +22,11 @@ def resetSimulation(): Unit =
   val name = domain.name
   domain = new Simulation
   domain.parseData(name)
+  directionVectors.selected.value = false
+  accelerationVectors.selected.value = false
+  trajectories.selected.value = false
+  lagrangeLines.selected.value = false
+  playPause.text = "Pause"
   displayMessage("Reset simulation.")
 
 def adjustSlider(): Unit =
@@ -43,7 +48,7 @@ def setupButtons(): Unit =
   slider.setMajorTickUnit(10)
   slider.setMinorTickCount(1)
   slider.setBlockIncrement(10)
-  slider.setSnapToTicks(true)
+  slider.setSnapToTicks(false)
   slider.setPrefWidth(200)
 
 def setupButtonActions(): Unit =

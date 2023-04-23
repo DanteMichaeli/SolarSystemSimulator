@@ -21,20 +21,15 @@ class Simulation:
   var isPaused = false
 
 
-  //Reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception. The method first checks for immediate illegal values and throws an exception if any are found (negatives, zeros et.c). Furthermore we check outside for the correct format of the file, and throw an exception if the file is not properly formatted.
-  //Main reason is that some requirements, like positive radius, mass or initial position, will not automatically throw exceptions, so we need to explicitly check for them inside the try-catch block.
-  //Like this we achieve the ability to truly cath ALL exceptions we are looking for, and display them both in the terminal on launch and in the GUI when opening a file from within the app.
-
   def parseData(fileName: String): Unit =
       name = fileName
       val source = scala.io.Source.fromFile(fileName)
       val lines = source.getLines().toList
       source.close()
-
       var counter = 0
         for line <- lines do
             if counter == 0 then
-              time = line.toDouble //time (in seconds) for how long to run the simulation.
+              time = line.toDouble
               if time <= 0 then throw new IllegalArgumentException("Simulation time must be positive.")
               counter += 1
             else if counter == 1 then
@@ -61,12 +56,6 @@ class Simulation:
                   else
                     throw new IllegalArgumentException(s"Invalid sort: ${cols(0)}. Body must be of sort 'sun', 'pla', or 'sat'.")
 
-
-
-
-
-
-  //method for writing and saving the simulation data to a .txt file, to be saved on the user's computer. In a format that can be read by the parseData method
   def saveData(fileName: String): Unit =
     val file = new java.io.File(fileName)
     val bw = new java.io.BufferedWriter(new java.io.FileWriter(file))
@@ -79,16 +68,11 @@ class Simulation:
         bw.write(s"${celestialBodies(n).sort}, ${celestialBodies(n).name}, ${celestialBodies(n).radius}, ${celestialBodies(n).mass}, ${celestialBodies(n).pos.x}, ${celestialBodies(n).pos.y}, ${celestialBodies(n).vel.x}, ${celestialBodies(n).vel.y}, ${celestialBodies(n).colorCode}\n")
     bw.close()
 
-
-  //checks if any two celestial bodies have collided (also checks with itself, but makes code easier)
   def detectCollisions(): Unit =
-    for i <- celestialBodies.indices do
-      for j <- i+1 until celestialBodies.length do
-        if celestialBodies(i).isColliding(celestialBodies(j)) then
-          collision = true
-          collisionData = "Collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name + " at time " + time + "."
-    
-
+    for i <- celestialBodies.indices; j <- i+1 until celestialBodies.length do
+      if celestialBodies(i).isColliding(celestialBodies(j)) then
+        collision = true
+        collisionData = "Collision detected between " + celestialBodies(i).name + " and " + celestialBodies(j).name + " at time " + time + "."
 
   //updates all planets accelerations, positions and velocities using the velocityVerlet method defined in Utils
   def updatePositions(): Unit =
@@ -102,8 +86,3 @@ class Simulation:
     celestialBodies.foreach( (body: CelestialBody) => body.trajectory += body.pos )
     updatePositions()
     detectCollisions()
-
-
-
-
-
