@@ -18,6 +18,7 @@ class Simulation:
   var directionVectorsOn = false
   var accelerationVectorsOn = false
   var lagrangeLinesOn = false
+  var isPaused = false
 
 
   //Reads in a (properly formatted) text file and instantiates the celestial bodies or throws an exception. The method first checks for immediate illegal values and throws an exception if any are found (negatives, zeros et.c). Furthermore we check outside for the correct format of the file, and throw an exception if the file is not properly formatted.

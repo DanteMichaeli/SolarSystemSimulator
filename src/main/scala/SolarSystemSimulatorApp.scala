@@ -59,61 +59,17 @@ object SolarSystemSimulatorApp extends JFXApp3 :
     setupDisplays()
 
 
-  // play/pause button for the gui:
-    val playPause = new Button("Pause")
-        playPause.setLayoutX(1)
-        playPause.setLayoutY(740)
-  //when playPause is pressed, the animation is paused and the button text is changed to "Play"
-    var isPaused = false
-    playPause.onAction = _ =>
-      if isPaused then
-        isPaused = false
-        playPause.text = "Pause"
-        displayMessage("Simulation resumed.")
-      else
-        isPaused = true
-        playPause.text = "Play"
-        displayMessage("Simulation paused.")
-
-
-  // button for resetting the simulation:
-    val reset = new Button("Reset")
-        reset.setLayoutX(55)
-        reset.setLayoutY(740)
-    reset.onAction = _ =>
-      val name = domain.name
-      domain = new Simulation
-      domain.parseData(name)
-      displayMessage("Reset simulation.")
-
-
-
-  // slider for adjusting dayAdjuster (dt), and therefore simulation speed. from 1/10 of dayAdjuster days to 2*dayAdjuster days
-    val slider = new Slider(1/10*dayAdjuster, 2*dayAdjuster, dayAdjuster)
-        slider.setLayoutX(200)
-        slider.setLayoutY(735)
-        slider.setShowTickLabels(true)
-        slider.setShowTickMarks(true)
-        slider.setMajorTickUnit(10)
-        slider.setMinorTickCount(1)
-        slider.setBlockIncrement(10)
-        slider.setSnapToTicks(true)
-        slider.setPrefWidth(200)
-    slider.valueProperty().addListener((_, oldValue, newValue) =>
-      dayAdjuster = newValue.intValue()
-      dt = (60*60*24*dayAdjuster) / 60
-      displayMessage("Time step adjusted: 1 simulation second = " + dayAdjuster + " days.")
-    )
-
     setupMenu()
-    actionSetup()
+    setupMenuActions()
+    setupButtons()
+    setupButtonActions()
 
 
 
 
   //animation timer for the gui, that pauses if variable isPaused is true. Updates the GUI at ≈ 60 fps
     val timer = AnimationTimer(t =>
-      if !isPaused && domain.time > 0 && !domain.collision then
+      if !domain.isPaused && domain.time > 0 && !domain.collision then
         domain.timePasses()
 
         stage.scene().content = Group(menuBar, playPause, reset, slider, timeLabel, messageDisplayer, infoDisplayer, drawSimulation())

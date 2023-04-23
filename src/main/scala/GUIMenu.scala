@@ -4,23 +4,21 @@ import scalafx.scene.control.{Alert, CheckMenuItem, Menu, MenuBar, MenuItem, Sep
 import scalafx.scene.paint.Color
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
-
 import scala.collection.mutable
 
-val menuBar = new MenuBar
-val fileMenu = new Menu("File")
-val viewMenu = new Menu("View")
-val editMenu = new Menu("Edit")
-val open = new MenuItem("Open")
-val save = new MenuItem("Save")                   //overwrites current file
-val saveAs = new MenuItem("Save As")              //saves as new file
-val addBody = new MenuItem("Add Celestial Body")
-val editSunRadii = new MenuItem("Sun Radii")
-val directionVectors = new CheckMenuItem("Direction Vectors")
+val menuBar =             new MenuBar
+val fileMenu =            new Menu("File")
+val viewMenu =            new Menu("View")
+val editMenu =            new Menu("Edit")
+val open =                new MenuItem("Open")
+val save =                new MenuItem("Save")                  //overwrites current file
+val saveAs =              new MenuItem("Save As")              //saves as new file
+val addBody =             new MenuItem("Add Celestial Body")
+val editSunRadii =        new MenuItem("Sun Radii")
+val directionVectors =    new CheckMenuItem("Direction Vectors")
 val accelerationVectors = new CheckMenuItem("Acceleration Vectors")
-val trajectories = new CheckMenuItem("Trajectories")
-val lagrangeLines = new CheckMenuItem("Lagrange Lines")
-
+val trajectories =        new CheckMenuItem("Trajectories")
+val lagrangeLines =       new CheckMenuItem("Lagrange Lines")
 
 //METHODS FOR MENU ITEMS
 def openSimulation(): Unit =
@@ -156,7 +154,7 @@ def setupMenu(): Unit =
   viewMenu.items = List(directionVectors, new SeparatorMenuItem, accelerationVectors, new SeparatorMenuItem, trajectories, new SeparatorMenuItem, lagrangeLines)
   menuBar.menus = List(fileMenu, editMenu, viewMenu)
 
-def actionSetup(): Unit =
+def setupMenuActions(): Unit = 
   open.onAction = _ => openSimulation()
   save.onAction = _ => saveSimulation()
   saveAs.onAction = _ => saveAsSimulation()
