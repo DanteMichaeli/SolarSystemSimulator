@@ -22,6 +22,10 @@ val lagrangeLines =       new CheckMenuItem("Lagrange Lines")
 
 //METHODS FOR MENU ITEMS
 def openSimulation(): Unit =
+  directionVectors.selected.value = false
+  accelerationVectors.selected.value = false
+  trajectories.selected.value = false
+  lagrangeLines.selected.value = false
   val fileChooser = new FileChooser()
   fileChooser.setTitle("Open Simulation File")
   fileChooser.getExtensionFilters.add(new ExtensionFilter("Text Files", "*.txt"))
